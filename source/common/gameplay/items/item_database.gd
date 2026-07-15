@@ -6,6 +6,8 @@ extends RefCounted
 
 const SPIRIT_WOOD: int = 9001
 const LOW_GRADE_SPIRIT_STONE: int = 9002
+const WOLF_CORE: int = 9003
+const SPIRIT_COINS: int = 9004
 
 ## item_id -> { "name": String, "stackable": bool, "icon": String }
 const ITEMS: Dictionary = {
@@ -16,6 +18,16 @@ const ITEMS: Dictionary = {
 	},
 	LOW_GRADE_SPIRIT_STONE: {
 		"name": "Low-Grade Spirit Stone",
+		"stackable": true,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
+	},
+	WOLF_CORE: {
+		"name": "Wolf Core",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+	},
+	SPIRIT_COINS: {
+		"name": "Spirit Coins",
 		"stackable": true,
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
 	},

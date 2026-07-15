@@ -8,5 +8,15 @@
     "name": "Low-Grade Spirit Stone",
     "stackable": true,
     "icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png"
+  },
+  "9003": {
+    "name": "Wolf Core",
+    "stackable": false,
+    "icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png"
+  },
+  "9004": {
+    "name": "Spirit Coins",
+    "stackable": true,
+    "icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png"
   }
 }

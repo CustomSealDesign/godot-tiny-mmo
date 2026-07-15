@@ -1,0 +1,72 @@
+[gd_scene load_steps=9 format=3 uid="uid://denemyspiritwolf"]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/enemy/enemy.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/clickable_area.tscn" id="2_click"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_body"]
+size = Vector3(1.1, 0.85, 1.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
+albedo_color = Color(0.55, 0.58, 0.68, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.35
+height = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_head"]
+albedo_color = Color(0.72, 0.74, 0.82, 1)
+emission_enabled = true
+emission = Color(0.18, 0.22, 0.35, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_click"]
+size = Vector2(72, 72)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fill"]
+bg_color = Color(0.86, 0.33, 0.28, 1)
+
+[node name="SpiritWolf" type="Node2D"]
+script = ExtResource("1_script")
+display_name = "Spirit Wolf"
+max_hp = 20
+attack_damage = 5
+loot_item_id = 9003
+loot_quantity = 1
+
+[node name="Visual3D" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Visual3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = SubResource("BoxMesh_body")
+surface_material_override/0 = SubResource("StandardMaterial3D_body")
+
+[node name="Head" type="MeshInstance3D" parent="Visual3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0.55)
+mesh = SubResource("SphereMesh_head")
+surface_material_override/0 = SubResource("StandardMaterial3D_head")
+
+[node name="ClickArea" parent="." instance=ExtResource("2_click")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClickArea"]
+shape = SubResource("RectangleShape2D_click")
+
+[node name="HealthBar" type="ProgressBar" parent="."]
+offset_left = -24.0
+offset_top = -88.0
+offset_right = 24.0
+offset_bottom = -80.0
+theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
+max_value = 20.0
+value = 20.0
+show_percentage = false
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = -48.0
+offset_top = -104.0
+offset_right = 48.0
+offset_bottom = -88.0
+theme_override_colors/font_color = Color(0.92, 0.92, 0.95, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+text = "Spirit Wolf"
+horizontal_alignment = 1

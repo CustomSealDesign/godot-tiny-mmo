@@ -32,13 +32,14 @@ var _equip_bar: ChannelVisual = null
 var _trauma: float = 0.0
 var _net_send_accum: float = 0.0
 var _woodcutting: bool = false
+var _combat: bool = false
 
 var pathfinder: GridPathfinder
 var _current_path: PackedVector2Array = PackedVector2Array()
 var _path_index: int = 0
 var _target_plane: Vector2 = Vector2.ZERO
 var _is_moving: bool = false
-var _pending_interact_tree: SpiritTree = null
+var _pending_interact: Node = null
 
 var fid_position: int
 var fid_flipped: int
@@ -92,6 +93,9 @@ func _ready() -> void:
 	Client.subscribe(&"equip.cast", _on_equip_cast)
 	Client.subscribe(&"equip.done", _on_equip_done)
 	Client.subscribe(&"woodcutting.state", _on_woodcutting_state)
+	Client.subscribe(&"combat.state", _on_combat_state)
+	Client.subscribe(&"combat.enemy_update", _on_combat_enemy_update)
+	Client.subscribe(&"system.message", _on_system_message)
 	Client.subscribe(&"group.roster", _on_group_roster)
 	Client.subscribe(&"dungeon.cleared", func(payload: Dictionary) -> void:
 		ClientState.open_menu_requested.emit(&"dungeon_recap", payload))
@@ -119,15 +123,17 @@ func is_moving_on_grid() -> bool:
 	return _is_moving
 
 
-func move_to_plane(destination_plane: Vector2, interact_tree: SpiritTree = null) -> void:
+func move_to_plane(destination_plane: Vector2, interact_target: Node = null) -> void:
 	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
 		return
 	if _woodcutting:
 		request_stop_woodcutting()
+	if _combat:
+		request_stop_combat()
 	if _channeling and not _channel_mobile:
 		_cancel_channel()
 
-	_pending_interact_tree = interact_tree
+	_pending_interact = interact_target
 	_stop_grid_movement()
 
 	var snapped_destination: Vector2 = GridMovement.snap_plane(destination_plane)
@@ -163,11 +169,12 @@ func _finish_grid_movement() -> void:
 	_sync_body_from_plane()
 	input_direction = Vector2.ZERO
 
-	var tree: SpiritTree = _pending_interact_tree
-	_pending_interact_tree = null
+	var interact_target: Node = _pending_interact
+	_pending_interact = null
 	movement_finished.emit()
-	if tree != null and is_instance_valid(tree):
-		tree.on_player_arrived()
+	if interact_target != null and is_instance_valid(interact_target) \
+			and interact_target.has_method(&"on_player_arrived"):
+		interact_target.on_player_arrived()
 
 
 func _physics_process(delta: float) -> void:
@@ -189,7 +196,7 @@ func _process(delta: float) -> void:
 
 func process_movement(delta: float) -> void:
 	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms \
-			or (_channeling and not _channel_mobile) or _woodcutting:
+			or (_channeling and not _channel_mobile) or _woodcutting or _combat:
 		_stop_grid_movement()
 		body.velocity = Vector3.ZERO
 		body.move_and_slide()
@@ -247,7 +254,7 @@ func process_input() -> void:
 		action_input = false
 		return
 
-	if _woodcutting:
+	if _woodcutting or _combat:
 		action_input = false
 		return
 
@@ -300,7 +307,7 @@ func process_animation(delta: float) -> void:
 		return
 	flipped = look_direction.x < 0.0
 	_update_hand_pivot(delta)
-	if _woodcutting:
+	if _woodcutting or _combat:
 		anim = Animations.IDLE
 		return
 	anim = Animations.RUN if input_direction != Vector2.ZERO else Animations.IDLE
@@ -400,13 +407,17 @@ func _on_channel_end(payload: Dictionary) -> void:
 
 
 func request_recall() -> void:
-	if _channeling or _woodcutting or InstanceClient.current == null:
+	if _channeling or _woodcutting or _combat or InstanceClient.current == null:
 		return
 	Client.request_data(&"recall.start", Callable(), {}, InstanceClient.current.name)
 
 
 func is_woodcutting() -> bool:
 	return _woodcutting
+
+
+func is_in_combat() -> bool:
+	return _combat
 
 
 func request_stop_woodcutting() -> void:
@@ -421,6 +432,38 @@ func _on_woodcutting_state(payload: Dictionary) -> void:
 	if active:
 		_stop_grid_movement()
 		input_direction = Vector2.ZERO
+
+
+func request_stop_combat() -> void:
+	if not _combat or InstanceClient.current == null:
+		return
+	Client.request_data(&"combat.stop", Callable(), {}, InstanceClient.current.name)
+
+
+func _on_combat_state(payload: Dictionary) -> void:
+	var active: bool = bool(payload.get("active", false))
+	_combat = active
+	if active:
+		_stop_grid_movement()
+		input_direction = Vector2.ZERO
+
+
+func _on_combat_enemy_update(payload: Dictionary) -> void:
+	var enemy_name: StringName = StringName(str(payload.get("enemy", "")))
+	if enemy_name.is_empty() or InstanceClient.current == null:
+		return
+	var map: Map = InstanceClient.current.instance_map
+	if map == null or not map.enemies.has(enemy_name):
+		return
+	var enemy: Enemy = map.enemies[enemy_name] as Enemy
+	if enemy != null and is_instance_valid(enemy):
+		enemy.apply_sync(payload)
+
+
+func _on_system_message(payload: Dictionary) -> void:
+	var message: String = str(payload.get("message", ""))
+	if not message.is_empty():
+		Toaster.toast(message)
 
 
 func _cancel_channel() -> void:

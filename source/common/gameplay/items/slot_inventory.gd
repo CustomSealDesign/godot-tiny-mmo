@@ -40,6 +40,38 @@ static func find_first_empty_slot(slots: Array) -> int:
 	return -1
 
 
+## Returns true when [param amount] of [param item_id] could be added without mutation.
+static func can_add_item(slots: Array, item_id: int, amount: int = 1) -> bool:
+	if item_id <= 0 or amount <= 0 or not ItemDatabase.has_item(item_id):
+		return false
+
+	var remaining: int = amount
+	if ItemDatabase.is_stackable(item_id):
+		for slot_v: Variant in slots:
+			var slot: Dictionary = slot_v as Dictionary
+			if int(slot.get("item_id", 0)) != item_id:
+				continue
+			var have: int = int(slot.get("quantity", 0))
+			if have >= MAX_STACK:
+				continue
+			var room: int = MAX_STACK - have
+			remaining -= mini(room, remaining)
+			if remaining <= 0:
+				return true
+		while remaining > 0:
+			if find_first_empty_slot(slots) < 0:
+				return false
+			var to_place: int = mini(remaining, MAX_STACK)
+			remaining -= to_place
+		return true
+
+	while remaining > 0:
+		if find_first_empty_slot(slots) < 0:
+			return false
+		remaining -= 1
+	return true
+
+
 ## Add items to the bag. Returns { ok, reason, added }.
 ## reason is "full" when no room remains.
 static func add_item(slots: Array, item_id: int, amount: int = 1) -> Dictionary:

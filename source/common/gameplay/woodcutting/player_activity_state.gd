@@ -6,4 +6,5 @@ extends RefCounted
 enum State {
 	IDLE,
 	WOODCUTTING,
+	COMBAT,
 }
