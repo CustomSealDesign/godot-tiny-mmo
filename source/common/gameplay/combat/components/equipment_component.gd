@@ -16,7 +16,7 @@ signal equipment_changed(
 )
 
 
-@export var character: Character
+@export var character: Node
 
 @export var synchronizer: StateSynchronizer
 
@@ -77,7 +77,7 @@ func can_use(slot: StringName, index: int, released: bool = false) -> bool:
 	return false
 
 
-func process_input(local_player: LocalPlayer) -> void:
+func process_input(local_player: Node) -> void:
 	var mounted: Weapon = mounted_nodes.get(&"weapon", null)
 
 	if mounted and mounted.has_method("process_input"):

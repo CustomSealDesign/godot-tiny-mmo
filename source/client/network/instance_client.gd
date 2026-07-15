@@ -2,14 +2,14 @@ class_name InstanceClient
 extends Node
 
 
-const LOCAL_PLAYER: PackedScene = preload("res://source/client/local_player/local_player.tscn")
-const DUMMY_PLAYER: PackedScene = preload("res://source/common/gameplay/characters/player/player.tscn")
+const LOCAL_PLAYER: PackedScene = preload("res://source/client/local_player/local_player_3d.tscn")
+const DUMMY_PLAYER: PackedScene = preload("res://source/common/gameplay/characters/player3d/player_3d.tscn")
 const FLOATING_DAMAGE_NUMBER: PackedScene = preload("res://source/client/ui/combat_feedback/floating_damage_number.tscn")
 
 static var current: InstanceClient
 static var local_player: LocalPlayer
 
-var players_by_peer_id: Dictionary[int, Player]
+var players_by_peer_id: Dictionary[int, Player3D]
 
 var synchronizer_manager: StateSynchronizerManagerClient
 var instance_map: Map
@@ -26,7 +26,7 @@ static func _on_action_performed(payload: Dictionary) -> void:
 		return
 	if payload.is_empty() or not payload.has_all(["p", "d", "i"]):
 		return
-	var player: Player = current.players_by_peer_id.get(payload["p"])
+	var player: Player3D = current.players_by_peer_id.get(payload["p"])
 	if not player:
 		return
 	if player.equipment_component.mounted_nodes.has(&"weapon"):
@@ -47,7 +47,7 @@ static func _on_combat_hit_static(payload: Dictionary) -> void:
 static func _on_channel_start(payload: Dictionary) -> void:
 	if current == null:
 		return
-	var player: Player = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
+	var player: Player3D = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
 	if player == null:
 		return
 	var existing: Node = player.get_node_or_null(^"ChannelVisual")
@@ -102,7 +102,7 @@ static func _on_channel_start(payload: Dictionary) -> void:
 static func _on_guard_cast(payload: Dictionary) -> void:
 	if current == null:
 		return
-	var player: Player = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
+	var player: Player3D = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
 	if player == null:
 		return
 	# Persistent floor aura for the whole buff (the honest "I'm guarding" tell). The
@@ -143,14 +143,15 @@ static func _on_guard_cast(payload: Dictionary) -> void:
 static func _on_battleform(payload: Dictionary) -> void:
 	if current == null:
 		return
-	var player: Player = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
+	var player: Player3D = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
 	if player == null:
 		return
 	var sc: float = float(payload.get("sc", 1.6))
 	var rune_build: float = float(payload.get("rb", 1.0))
 	var grow_s: float = float(payload.get("g", 1.2))
 	var windup: float = rune_build + grow_s
-	var cam: Node2D = player.get_node_or_null(^"Camera2D") as Node2D
+	var cam_3d: Camera3D = player.get_node_or_null(^"Camera3D") as Camera3D
+	var body: Node3D = player.get_node_or_null(^"Body") as Node3D
 
 	# Ground rune the titan rises from — fixed-size on the MAP (so the grow doesn't balloon it),
 	# under the body. SEQUENCED: the BUILD frames play over rune_build then HOLD at full while
@@ -177,9 +178,10 @@ static func _on_battleform(payload: Dictionary) -> void:
 	grow.tween_interval(rune_build)
 	grow.tween_method(func(f: float) -> void:
 		if is_instance_valid(player):
-			player.scale = Vector2(f, f)
-			if cam != null and is_instance_valid(cam):
-				cam.scale = Vector2(1.0 / f, 1.0 / f),
+			if body != null and is_instance_valid(body):
+				body.scale = Vector3(f, f, f)
+			if cam_3d != null and is_instance_valid(cam_3d):
+				cam_3d.size = 12.0 / f,
 		1.0, sc, grow_s)
 
 	# Wind-up done → swap the held rune for the one-shot fade.
@@ -195,16 +197,17 @@ static func _on_battleform(payload: Dictionary) -> void:
 
 	await player.get_tree().create_timer(maxf(0.0, float(payload.get("d", 8.0)) - windup)).timeout
 	if is_instance_valid(player):
-		player.scale = Vector2.ONE
-		if cam != null and is_instance_valid(cam):
-			cam.scale = Vector2.ONE
+		if body != null and is_instance_valid(body):
+			body.scale = Vector3.ONE
+		if cam_3d != null and is_instance_valid(cam_3d):
+			cam_3d.size = 12.0
 
 
 ## Channel ended (completed, cancelled, caster died) — drop the aura.
 static func _on_channel_end(payload: Dictionary) -> void:
 	if current == null:
 		return
-	var player: Player = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
+	var player: Player3D = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
 	if player == null:
 		return
 	var visual: Node = player.get_node_or_null(^"ChannelVisual")
@@ -273,7 +276,7 @@ func ready_to_enter_instance() -> void:
 #region spawn/despawn
 @rpc("authority", "call_remote", "reliable", 0)
 func spawn_player(player_id: int) -> void:
-	var new_player: Player
+	var new_player: Player3D
 	
 	if player_id == multiplayer.get_unique_id():
 		# Reuse local player if already exists.
@@ -343,7 +346,7 @@ func _on_combat_hit(payload: Dictionary) -> void:
 func despawn_player(player_id: int) -> void:
 	synchronizer_manager.remove_entity(player_id)
 	
-	var player: Player = players_by_peer_id.get(player_id, null)
+	var player: Player3D = players_by_peer_id.get(player_id, null)
 	if player and player != local_player:
 		player.queue_free()
 	players_by_peer_id.erase(player_id)
