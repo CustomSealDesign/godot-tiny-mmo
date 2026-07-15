@@ -7,6 +7,8 @@ const RECIPE_IRONBONE_PILL: StringName = &"ironbone_pill"
 const RECIPE_BLOOD_REFINING_PILL: StringName = &"blood_refining_pill"
 const RECIPE_HEAVENLY_TRIBULATION_PILL: StringName = &"heavenly_tribulation_pill"
 const RECIPE_VOID_DAO_PILL: StringName = &"void_dao_pill"
+const RECIPE_COPPER_SWORD: StringName = &"copper_sword"
+const RECIPE_METEOR_IRON_CHESTPLATE: StringName = &"meteor_iron_chestplate"
 
 ## recipe_id -> recipe dictionary
 const RECIPES: Dictionary = {
@@ -68,6 +70,28 @@ const RECIPES: Dictionary = {
 		],
 		"outputs": [
 			{"item_id": ItemDatabase.VOID_DAO_PILL, "quantity": 1},
+		],
+	},
+	RECIPE_COPPER_SWORD: {
+		"skill": SkillManager.FORGING,
+		"level_required": 1,
+		"xp_reward": 50,
+		"inputs": [
+			{"item_id": ItemDatabase.SPIRIT_COPPER_ORE, "quantity": 2},
+		],
+		"outputs": [
+			{"item_id": ItemDatabase.COPPER_SWORD, "quantity": 1},
+		],
+	},
+	RECIPE_METEOR_IRON_CHESTPLATE: {
+		"skill": SkillManager.FORGING,
+		"level_required": 25,
+		"xp_reward": 500,
+		"inputs": [
+			{"item_id": ItemDatabase.METEOR_IRON_ORE, "quantity": 3},
+		],
+		"outputs": [
+			{"item_id": ItemDatabase.METEOR_IRON_CHESTPLATE, "quantity": 1},
 		],
 	},
 }

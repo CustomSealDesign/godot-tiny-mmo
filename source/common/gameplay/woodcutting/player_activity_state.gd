@@ -8,4 +8,6 @@ enum State {
 	WOODCUTTING,
 	COMBAT,
 	ALCHEMY,
+	MINING,
+	FORGING,
 }

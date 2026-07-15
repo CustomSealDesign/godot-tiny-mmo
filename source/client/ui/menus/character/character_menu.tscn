@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://blh63bbqvk7pv" path="res://source/client/ui/menus/inventory/attributes_panel.gd" id="4_attr"]
 [ext_resource type="Script" uid="uid://d1q3d0rf4tsle" path="res://source/client/ui/menus/character/jobs_panel.gd" id="5_jobs"]
 [ext_resource type="Script" path="res://source/client/ui/menus/character/skills_panel.gd" id="6_skills"]
+[ext_resource type="Script" path="res://source/client/ui/menus/character/equipment_panel.gd" id="6_equipment"]
 [ext_resource type="Script" path="res://source/client/ui/menus/character/mastery_panel.gd" id="7_mastery"]
 
 [sub_resource type="StyleBoxEmpty" id="SBE_card"]
@@ -88,6 +89,14 @@ layout_mode = 2
 theme_type_variation = &"HeaderTab"
 toggle_mode = true
 text = "Skills"
+
+[node name="EquipmentTab" type="Button" parent="Margin/Card/Pad/Root/HeaderBar/TabBar" unique_id=1717343593]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+theme_type_variation = &"HeaderTab"
+toggle_mode = true
+text = "Equipment"
 
 [node name="JobsTab" type="Button" parent="Margin/Card/Pad/Root/HeaderBar/TabBar" unique_id=1717343591]
 unique_name_in_owner = true
@@ -267,6 +276,20 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 8
+
+[node name="EquipmentContent" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content" unique_id=1596733833]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+script = ExtResource("6_equipment")
+
+[node name="EquipmentSlotGrid" type="GridContainer" parent="Margin/Card/Pad/Root/Content/EquipmentContent" unique_id=1924344972]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 12
+columns = 4
 
 [node name="MasteryContent" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content" unique_id=1999000102]
 unique_name_in_owner = true

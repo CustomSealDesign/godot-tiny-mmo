@@ -42,7 +42,9 @@ static func start(peer_id: int, player: Player, enemy: Enemy, instance: ServerIn
 		return {"ok": false, "reason": "too_far"}
 
 	WoodcuttingService.stop(peer_id, "combat")
+	MiningService.stop(peer_id, "combat")
 	AlchemyService.stop(peer_id, "combat")
+	ForgingService.stop(peer_id, "combat")
 	stop(peer_id, "restart")
 
 	_ensure_tick_hook()
