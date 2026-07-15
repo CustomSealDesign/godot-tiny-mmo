@@ -7,6 +7,7 @@ extends MenuShell
 const INVENTORY_COLUMNS: int = 4
 const BANK_COLUMNS: int = 8
 const SLOT_SIZE: Vector2 = Vector2(40, 40)
+const SLOT_FRAME_TEXTURE: Texture2D = preload("res://assets/ui/menus/ui_slot_frame.svg")
 
 var _vault_key: String = ""
 var _inventory_buttons: Array[Button] = []
@@ -110,6 +111,7 @@ func _make_panel(
 		button.custom_minimum_size = SLOT_SIZE
 		button.clip_contents = true
 		button.focus_mode = Control.FOCUS_NONE
+		_apply_slot_frame(button)
 		button.pressed.connect(_on_slot_pressed.bind(slot_index, is_inventory))
 		grid.add_child(button)
 		buttons.append(button)
@@ -228,3 +230,10 @@ func _clear_slot_button(button: Button) -> void:
 	button.tooltip_text = ""
 	for child: Node in button.get_children():
 		child.queue_free()
+
+
+func _apply_slot_frame(button: Button) -> void:
+	var style: StyleBoxTexture = StyleBoxTexture.new()
+	style.texture = SLOT_FRAME_TEXTURE
+	for state: StringName in [&"normal", &"hover", &"pressed", &"focus", &"disabled"]:
+		button.add_theme_stylebox_override(state, style)
