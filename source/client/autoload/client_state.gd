@@ -113,6 +113,7 @@ func _ready() -> void:
 	Client.subscribe(&"active_guild_id.set", func(payload: Dictionary):
 		active_guild_id = payload.get("active_guild_id", 0))
 	Client.subscribe(&"cultivation.update", apply_cultivation)
+	Client.subscribe(&"cultivation.breakthrough", _on_cultivation_breakthrough)
 	Client.subscribe(&"woodcutting.result", _on_woodcutting_result)
 	Client.subscribe(&"stats.get", func(data: Dictionary):
 		stats.data.merge(data, true)
@@ -140,6 +141,31 @@ func apply_cultivation(data: Dictionary) -> void:
 	cultivation_realm = str(data.get("cultivation_realm", cultivation_realm))
 	woodcutting_xp = int(data.get("woodcutting_xp", woodcutting_xp))
 	cultivation_changed.emit()
+
+
+func _on_cultivation_breakthrough(data: Dictionary) -> void:
+	var realm: String = str(data.get("realm", cultivation_realm))
+	apply_cultivation(data)
+	var message: String = "You have broken through to %s!" % realm
+	Toaster.toast_group(
+		"Breakthrough!",
+		PackedStringArray([message]),
+		5.0,
+	)
+	_spawn_breakthrough_effect(data)
+
+
+func _spawn_breakthrough_effect(data: Dictionary) -> void:
+	if InstanceClient.current == null:
+		return
+	var plane: Vector2 = data.get("position", Vector2.ZERO)
+	if plane == Vector2.ZERO and local_player != null and is_instance_valid(local_player):
+		plane = local_player.global_position
+	if plane == Vector2.ZERO:
+		return
+	BreakthroughEffect.spawn_at_plane(plane, InstanceClient.current.instance_map)
+	if local_player != null and is_instance_valid(local_player) and local_player.has_method(&"shake_camera"):
+		local_player.shake_camera(0.75)
 
 
 func _on_woodcutting_result(data: Dictionary) -> void:
