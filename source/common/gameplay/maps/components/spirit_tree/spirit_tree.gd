@@ -8,6 +8,9 @@ extends Node2D
 const INTERACT_RANGE: float = WoodcuttingService.INTERACT_RANGE
 const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/components/interactable_marker.tscn")
 
+@export var required_level: int = 1
+@export var gather_item_id: int = ItemDatabase.SPIRIT_WOOD
+@export var gather_xp: int = 25
 @export var floor_collision_mask: int = 1
 @export var floor_probe_height: float = 32.0
 @export var floor_probe_depth: float = 64.0

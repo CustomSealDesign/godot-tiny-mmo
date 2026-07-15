@@ -58,6 +58,10 @@ static func start(
 	var required_level: int = int(recipe.get("level_required", 1))
 	var alchemy_level: int = SkillManager.get_level_from_xp(resource.get_osrs_skill_xp(SkillManager.ALCHEMY))
 	if alchemy_level < required_level:
+		_push_system_message(
+			peer_id,
+			"You need an Alchemy level of %d to craft this." % required_level
+		)
 		return {"ok": false, "reason": "level", "required_level": required_level}
 
 	WoodcuttingService.stop(peer_id, "alchemy")
@@ -223,3 +227,9 @@ static func _push_error(peer_id: int, message: String) -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
 	WorldServer.curr.data_push.rpc_id(peer_id, &"alchemy.error", {"message": message})
+
+
+static func _push_system_message(peer_id: int, message: String) -> void:
+	if WorldServer.curr == null or peer_id <= 0:
+		return
+	WorldServer.curr.data_push.rpc_id(peer_id, &"system.message", {"message": message})

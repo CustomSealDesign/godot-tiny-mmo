@@ -9,7 +9,18 @@ const LOW_GRADE_SPIRIT_STONE: int = 9002
 const WOLF_CORE: int = 9003
 const SPIRIT_COINS: int = 9004
 const MINOR_BLOOD_PILL: int = 9005
-const FOUNDATION_PILL: int = 9006
+const IRONBONE_PILL: int = 9006
+const IRONWOOD: int = 9007
+const BLOODWOOD: int = 9008
+const HEAVENLY_ASH: int = 9009
+const VOID_TIMBER: int = 9010
+const DEMONIC_BEAR_CORE: int = 9011
+const WYRM_CORE: int = 9012
+const DRAGON_CORE: int = 9013
+const VOID_BEAST_CORE: int = 9014
+const BLOOD_REFINING_PILL: int = 9015
+const HEAVENLY_TRIBULATION_PILL: int = 9016
+const VOID_DAO_PILL: int = 9017
 
 ## item_id -> { "name": String, "stackable": bool, "icon": String, "qi_value": int }
 const ITEMS: Dictionary = {
@@ -43,11 +54,77 @@ const ITEMS: Dictionary = {
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
 		"qi_value": 200,
 	},
-	FOUNDATION_PILL: {
-		"name": "Foundation Pill",
+	IRONBONE_PILL: {
+		"name": "Ironbone Pill",
 		"stackable": false,
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
 		"qi_value": 1000,
+	},
+	IRONWOOD: {
+		"name": "Ironwood",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_10.png",
+		"qi_value": 25,
+	},
+	BLOODWOOD: {
+		"name": "Bloodwood",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_10.png",
+		"qi_value": 100,
+	},
+	HEAVENLY_ASH: {
+		"name": "Heavenly Ash",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_10.png",
+		"qi_value": 500,
+	},
+	VOID_TIMBER: {
+		"name": "Void Timber",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_10.png",
+		"qi_value": 2000,
+	},
+	DEMONIC_BEAR_CORE: {
+		"name": "Demonic Bear Core",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 250,
+	},
+	WYRM_CORE: {
+		"name": "Wyrm Core",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 1000,
+	},
+	DRAGON_CORE: {
+		"name": "Dragon Core",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 5000,
+	},
+	VOID_BEAST_CORE: {
+		"name": "Void Beast Core",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 20000,
+	},
+	BLOOD_REFINING_PILL: {
+		"name": "Blood Refining Pill",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 5000,
+	},
+	HEAVENLY_TRIBULATION_PILL: {
+		"name": "Heavenly Tribulation Pill",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 25000,
+	},
+	VOID_DAO_PILL: {
+		"name": "Void Dao Pill",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 100000,
 	},
 }
 

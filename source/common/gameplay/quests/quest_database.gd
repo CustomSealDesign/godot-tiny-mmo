@@ -21,7 +21,7 @@ const QUESTS: Dictionary = {
 		"required_item_id": ItemDatabase.WOLF_CORE,
 		"required_amount": 3,
 		"combat_xp_reward": 500,
-		"reward_item_id": ItemDatabase.FOUNDATION_PILL,
+		"reward_item_id": ItemDatabase.IRONBONE_PILL,
 		"reward_item_quantity": 1,
 	},
 }
