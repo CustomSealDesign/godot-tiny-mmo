@@ -28,6 +28,7 @@ bg_color = Color(0.86, 0.33, 0.28, 1)
 script = ExtResource("1_script")
 display_name = "Spirit Wolf"
 max_hp = 20
+defense_level = 2
 attack_damage = 5
 loot_item_id = 9003
 loot_quantity = 1

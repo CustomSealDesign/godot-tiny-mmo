@@ -6,7 +6,9 @@ extends RefCounted
 const TICKS_PER_ATTACK: int = 4
 const INTERACT_RANGE: float = 90.0
 const MOVE_TOLERANCE: float = 2.0
-const DEFAULT_DAMAGE: int = 5
+
+const XP_PER_DAMAGE_STANCE: float = 4.0
+const XP_PER_DAMAGE_HITPOINTS: float = 1.33
 
 class Session:
 	var peer_id: int
@@ -123,8 +125,79 @@ static func _tick_session(peer_id: int) -> void:
 	if session.ticks_elapsed % TICKS_PER_ATTACK != 0:
 		return
 
-	var damage: int = session.enemy.get_attack_damage()
-	session.enemy.apply_damage(damage, session.instance)
+	var resource: PlayerResource = session.player.player_resource
+	var equipment_stats: Dictionary = EquipmentService.get_total_equipment_stats(resource)
+	var damage: int = _roll_player_damage(resource, session.enemy, equipment_stats)
+	if damage > 0:
+		session.enemy.apply_damage(damage, session.instance)
+		_grant_combat_xp(peer_id, resource, damage)
+
+
+static func _roll_player_damage(
+	resource: PlayerResource,
+	enemy: Enemy,
+	equipment_stats: Dictionary
+) -> int:
+	var attack_level: int = SkillManager.get_level_from_xp(resource.get_osrs_skill_xp(SkillManager.ATTACK))
+	var strength_level: int = SkillManager.get_level_from_xp(resource.get_osrs_skill_xp(SkillManager.STRENGTH))
+	var attack_bonus: int = int(equipment_stats.get("slash_attack", 0))
+	var strength_bonus: int = int(equipment_stats.get("melee_strength", 0))
+
+	var attack_roll: int = _attack_roll(attack_level, attack_bonus)
+	var defense_roll: int = _defense_roll(enemy.defense_level, enemy.defense_bonus)
+	if randf() >= _hit_chance(attack_roll, defense_roll):
+		return 0
+
+	var max_hit: int = _max_hit(strength_level, strength_bonus)
+	return randi_range(0, maxi(0, max_hit))
+
+
+static func _effective_level(skill_level: int) -> int:
+	return skill_level + 8
+
+
+static func _attack_roll(attack_level: int, attack_bonus: int) -> int:
+	return _effective_level(attack_level) * (attack_bonus + 64)
+
+
+static func _defense_roll(defense_level: int, defense_bonus: int) -> int:
+	return _effective_level(defense_level) * (defense_bonus + 64)
+
+
+static func _hit_chance(attack_roll: int, defense_roll: int) -> float:
+	if attack_roll > defense_roll:
+		return 1.0 - float(defense_roll + 2) / float(2 * (attack_roll + 1))
+	return float(attack_roll) / float(2 * (defense_roll + 1))
+
+
+static func _max_hit(strength_level: int, strength_bonus: int) -> int:
+	var effective_strength: int = _effective_level(strength_level)
+	return int(0.5 + float(effective_strength * (strength_bonus + 64)) / 640.0)
+
+
+static func _stance_skill(stance: String) -> StringName:
+	match stance:
+		"aggressive":
+			return SkillManager.STRENGTH
+		"defensive":
+			return SkillManager.DEFENSE
+		_:
+			return SkillManager.ATTACK
+
+
+static func _grant_combat_xp(peer_id: int, resource: PlayerResource, damage: int) -> void:
+	if damage <= 0:
+		return
+	var stance_skill: StringName = _stance_skill(resource.get_combat_stance())
+	var stance_xp: int = int(damage * XP_PER_DAMAGE_STANCE)
+	var hitpoints_xp: int = int(roundf(float(damage) * XP_PER_DAMAGE_HITPOINTS))
+
+	OsrsSkillService.add_xp(resource, stance_skill, stance_xp)
+	OsrsSkillService.add_xp(resource, SkillManager.HITPOINTS, hitpoints_xp)
+
+	if WorldServer.curr != null:
+		WorldServer.curr.database.save_player(resource)
+	OsrsSkillService.push_to_peer(peer_id, resource)
 
 
 static func _session_valid(session: Session) -> bool:

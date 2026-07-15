@@ -54,6 +54,9 @@ signal bank_changed
 ## OSRS equipment slots mirrored from equipment.update / equipment.get.
 var equipment: Dictionary = {}
 signal equipment_changed
+## Active melee combat stance mirrored from combat.stance.update.
+var combat_stance: String = "accurate"
+signal combat_stance_changed
 ## True while a blocking menu is open (NPC dialogue, shop, quest log, inventory).
 ## While set, the local player's movement and actions are suppressed, so you can't
 ## walk or fight with a menu up, and can't keep one open to act from afar. Only the
@@ -131,6 +134,7 @@ func _ready() -> void:
 	Client.subscribe(&"inventory.update", apply_inventory)
 	Client.subscribe(&"bank.update", apply_bank)
 	Client.subscribe(&"equipment.update", apply_equipment)
+	Client.subscribe(&"combat.stance.update", apply_combat_stance)
 	Client.subscribe(&"skills.update", apply_skills)
 	Client.subscribe(&"quests.update", apply_quests)
 	Client.subscribe(&"alchemy.result", _on_alchemy_result)
@@ -189,6 +193,16 @@ func apply_equipment(data: Dictionary) -> void:
 	if equipment_v is Dictionary:
 		equipment = equipment_v
 		equipment_changed.emit()
+
+
+func apply_combat_stance(data: Dictionary) -> void:
+	var stance: String = str(data.get("combat_stance", combat_stance))
+	if stance not in ["accurate", "aggressive", "defensive"]:
+		stance = "accurate"
+	if stance == combat_stance:
+		return
+	combat_stance = stance
+	combat_stance_changed.emit()
 
 
 func apply_skills(data: Dictionary) -> void:

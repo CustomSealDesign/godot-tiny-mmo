@@ -68,10 +68,10 @@ func save_player(player: PlayerResource) -> void:
 	db.query_with_bindings(
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, level, experience, qi_level, cultivation_realm, woodcutting_xp, available_attributes_points, "
-		+ "profile_status, profile_animation, "
+		+ "profile_status, profile_animation, combat_stance, "
 		+ "attributes_json, inventory_json, slot_inventory_json, bank_inventory_json, equipment_json, skills_json, osrs_skills_json, osrs_quests_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -86,6 +86,7 @@ func save_player(player: PlayerResource) -> void:
 
 			player.profile_status,
 			player.profile_animation,
+			player.get_combat_stance(),
 
 			attributes_json,
 			inventory_json,
@@ -146,7 +147,9 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	player.titles_unlocked = PackedStringArray(["Alpha tester"])
 	player.display_title = "Alpha tester"
 	player.ensure_osrs_skills()
+	player.osrs_skills[SkillManager.HITPOINTS] = SkillManager.starting_hitpoints_xp()
 	player.ensure_osrs_equipment()
+	player.ensure_combat_stance()
 	# Leave defaults to PlayerResource where possible.
 	save_player(player)
 	return next_id
@@ -247,6 +250,8 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 
 	player.profile_status = str(row.get("profile_status", ""))
 	player.profile_animation = str(row.get("profile_animation", ""))
+	player.combat_stance = str(row.get("combat_stance", "accurate"))
+	player.ensure_combat_stance()
 
 	player.attributes.assign(JSON.parse_string(str(row.get("attributes_json", "{}"))) as Dictionary)
 	player.inventory = Inventory.normalize(JSON.parse_string(str(row.get("inventory_json", "{}"))) as Dictionary)

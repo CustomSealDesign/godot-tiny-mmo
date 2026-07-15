@@ -11,6 +11,10 @@ const ALCHEMY: StringName = &"Alchemy"
 const COMBAT: StringName = &"Combat"
 const MINING: StringName = &"Mining"
 const FORGING: StringName = &"Forging"
+const ATTACK: StringName = &"Attack"
+const STRENGTH: StringName = &"Strength"
+const DEFENSE: StringName = &"Defense"
+const HITPOINTS: StringName = &"Hitpoints"
 
 const STARTING_SKILLS: Array[StringName] = [
 	SPIRIT_GATHERING,
@@ -18,7 +22,14 @@ const STARTING_SKILLS: Array[StringName] = [
 	COMBAT,
 	MINING,
 	FORGING,
+	ATTACK,
+	STRENGTH,
+	DEFENSE,
+	HITPOINTS,
 ]
+
+static func starting_hitpoints_xp() -> int:
+	return xp_for_level(10)
 
 ## Precomputed total XP required to reach each level (index = level, value = xp).
 static var _xp_for_level: PackedInt32Array = PackedInt32Array()

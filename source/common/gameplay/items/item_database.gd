@@ -149,6 +149,7 @@ const ITEMS: Dictionary = {
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
 		"qi_value": 0,
 		"equip_slot": "weapon",
+		"equipment_stats": {"slash_attack": 5, "melee_strength": 4},
 	},
 	METEOR_IRON_CHESTPLATE: {
 		"name": "Meteor Iron Chestplate",
@@ -156,6 +157,7 @@ const ITEMS: Dictionary = {
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
 		"qi_value": 0,
 		"equip_slot": "chest",
+		"equipment_stats": {"slash_defense": 15},
 	},
 }
 
@@ -190,6 +192,17 @@ static func get_equip_slot(item_id: int) -> String:
 
 static func is_equippable(item_id: int) -> bool:
 	return not get_equip_slot(item_id).is_empty()
+
+
+static func get_equipment_stats(item_id: int) -> Dictionary:
+	var stats_v: Variant = ITEMS.get(item_id, {}).get("equipment_stats", {})
+	if stats_v is Dictionary:
+		return stats_v as Dictionary
+	return {}
+
+
+static func get_equipment_stat(item_id: int, stat_key: String) -> int:
+	return int(get_equipment_stats(item_id).get(stat_key, 0))
 
 
 static func load_icon(item_id: int) -> Texture2D:
