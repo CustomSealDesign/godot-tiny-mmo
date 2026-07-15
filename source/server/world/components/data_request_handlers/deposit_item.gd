@@ -35,10 +35,12 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		return {"ok": false, "reason": "empty_slot"}
 
 	if not BankInventory.can_add_item(resource.bank_inventory, item_id, quantity):
+		_push_system_message(peer_id, "Your bank is full.")
 		return {"ok": false, "reason": "bank_full"}
 
 	var bank_result: Dictionary = BankInventory.add_item(resource.bank_inventory, item_id, quantity)
 	if not bool(bank_result.get("ok", false)):
+		_push_system_message(peer_id, "Your bank is full.")
 		return {"ok": false, "reason": str(bank_result.get("reason", "bank_full"))}
 
 	slots[slot_index] = {"item_id": 0, "quantity": 0}
@@ -56,6 +58,12 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		"slots": SlotInventory.to_payload(resource.slot_inventory),
 		"bank_slots": BankInventory.to_payload(resource.bank_inventory),
 	}
+
+
+func _push_system_message(peer_id: int, message: String) -> void:
+	if WorldServer.curr == null or peer_id <= 0 or message.is_empty():
+		return
+	WorldServer.curr.data_push.rpc_id(peer_id, &"system.message", {"message": message})
 
 
 func _near_vault(player: Player, instance: ServerInstance, args: Dictionary) -> bool:

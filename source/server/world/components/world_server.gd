@@ -122,6 +122,9 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	# Drop rate-limit counters so a reconnect starts with a clean window.
 	RateLimiter.forget(peer_id)
 	WoodcuttingService.stop(peer_id, "disconnect")
+	MiningService.stop(peer_id, "disconnect")
+	AlchemyService.stop(peer_id, "disconnect")
+	ForgingService.stop(peer_id, "disconnect")
 
 	world_manager.player_disconnected.rpc_id(1, connected_players[peer_id].account_name)
 	var player: PlayerResource = connected_players.get(peer_id)
@@ -191,6 +194,11 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 			peer_id,
 			&"skills.update",
 			OsrsSkillService.payload(connected_players[peer_id])
+		)
+		data_push.rpc_id.call_deferred(
+			peer_id,
+			&"equipment.update",
+			EquipmentService.payload(connected_players[peer_id])
 		)
 		data_push.rpc_id.call_deferred(
 			peer_id,

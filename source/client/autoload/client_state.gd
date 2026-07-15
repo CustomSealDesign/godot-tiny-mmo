@@ -51,6 +51,9 @@ signal inventory_changed
 ## Sect Vault bank mirrored from bank.update / open_bank responses.
 var bank_inventory: Array = []
 signal bank_changed
+## OSRS equipment slots mirrored from equipment.update / equipment.get.
+var equipment: Dictionary = {}
+signal equipment_changed
 ## True while a blocking menu is open (NPC dialogue, shop, quest log, inventory).
 ## While set, the local player's movement and actions are suppressed, so you can't
 ## walk or fight with a menu up, and can't keep one open to act from afar. Only the
@@ -127,6 +130,7 @@ func _ready() -> void:
 	Client.subscribe(&"cultivation.update", apply_cultivation)
 	Client.subscribe(&"inventory.update", apply_inventory)
 	Client.subscribe(&"bank.update", apply_bank)
+	Client.subscribe(&"equipment.update", apply_equipment)
 	Client.subscribe(&"skills.update", apply_skills)
 	Client.subscribe(&"quests.update", apply_quests)
 	Client.subscribe(&"alchemy.result", _on_alchemy_result)
@@ -134,6 +138,10 @@ func _ready() -> void:
 	Client.subscribe(&"cultivation.breakthrough", _on_cultivation_breakthrough)
 	Client.subscribe(&"woodcutting.result", _on_woodcutting_result)
 	Client.subscribe(&"woodcutting.error", _on_woodcutting_error)
+	Client.subscribe(&"mining.result", _on_mining_result)
+	Client.subscribe(&"mining.error", _on_mining_error)
+	Client.subscribe(&"forging.result", _on_forging_result)
+	Client.subscribe(&"forging.error", _on_forging_error)
 	Client.subscribe(&"stats.get", func(data: Dictionary):
 		stats.data.merge(data, true)
 	)
@@ -174,6 +182,13 @@ func apply_bank(data: Dictionary) -> void:
 	if slots_v is Array:
 		bank_inventory = slots_v
 		bank_changed.emit()
+
+
+func apply_equipment(data: Dictionary) -> void:
+	var equipment_v: Variant = data.get("equipment", {})
+	if equipment_v is Dictionary:
+		equipment = equipment_v
+		equipment_changed.emit()
 
 
 func apply_skills(data: Dictionary) -> void:
@@ -250,6 +265,43 @@ func _on_woodcutting_result(data: Dictionary) -> void:
 
 
 func _on_woodcutting_error(data: Dictionary) -> void:
+	var message: String = str(data.get("message", ""))
+	if not message.is_empty():
+		Toaster.toast(message)
+
+
+func _on_mining_result(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		return
+	var lines: PackedStringArray = PackedStringArray()
+	var mining_xp: int = int(data.get("mining_xp_gained", 0))
+	if mining_xp > 0:
+		lines.append("+%d Mining XP" % mining_xp)
+		if bool(data.get("mining_leveled_up", false)):
+			lines.append("Mining Level %d!" % int(data.get("mining_level", 1)))
+	var item_name: String = str(data.get("item_name", ""))
+	if not item_name.is_empty():
+		lines.append("+1 %s" % item_name)
+	Toaster.toast_group("Spirit Vein", lines)
+
+
+func _on_mining_error(data: Dictionary) -> void:
+	var message: String = str(data.get("message", ""))
+	if not message.is_empty():
+		Toaster.toast(message)
+
+
+func _on_forging_result(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		return
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("+%d %s XP" % [int(data.get("xp_gained", 0)), str(data.get("skill", "Forging"))])
+	if bool(data.get("leveled_up", false)):
+		lines.append("%s Level %d!" % [str(data.get("skill", "Forging")), int(data.get("level", 1))])
+	Toaster.toast_group("Forging", lines)
+
+
+func _on_forging_error(data: Dictionary) -> void:
 	var message: String = str(data.get("message", ""))
 	if not message.is_empty():
 		Toaster.toast(message)

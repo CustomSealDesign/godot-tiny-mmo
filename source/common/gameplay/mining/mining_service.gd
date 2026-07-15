@@ -1,18 +1,16 @@
-class_name WoodcuttingService
+class_name MiningService
 extends RefCounted
-## Server-authoritative woodcutting loop driven by [TickManager] game ticks.
+## Server-authoritative mining loop driven by [TickManager] game ticks.
 
 
 const TICKS_PER_ROLL: int = 3
 const INTERACT_RANGE: float = 90.0
 const MOVE_TOLERANCE: float = 2.0
-const XP_PER_SUCCESS: int = 10
-const QI_PER_SUCCESS: int = 5
 
 class Session:
 	var peer_id: int
 	var player: Player
-	var tree: SpiritTree
+	var vein: SpiritVein
 	var instance: ServerInstance
 	var anchor_position: Vector2
 	var ticks_elapsed: int = 0
@@ -20,12 +18,12 @@ class Session:
 	func _init(
 		p_peer_id: int,
 		p_player: Player,
-		p_tree: SpiritTree,
+		p_vein: SpiritVein,
 		p_instance: ServerInstance
 	) -> void:
 		peer_id = p_peer_id
 		player = p_player
-		tree = p_tree
+		vein = p_vein
 		instance = p_instance
 		anchor_position = p_player.global_position
 
@@ -34,19 +32,15 @@ static var _sessions: Dictionary[int, Session] = {}
 static var _tick_connected: bool = false
 
 
-static func level_from_xp(xp: int) -> int:
-	return maxi(1, 1 + xp / 25)
-
-
-static func success_chance(xp: int) -> float:
-	var level: int = level_from_xp(xp)
+static func success_chance(mining_xp: int) -> float:
+	var level: int = SkillManager.get_level_from_xp(mining_xp)
 	return clampf(0.05 + float(level - 1) * 0.04, 0.05, 0.90)
 
 
-static func start(peer_id: int, player: Player, tree: SpiritTree, instance: ServerInstance) -> Dictionary:
-	if player == null or tree == null or instance == null or player.is_dead:
+static func start(peer_id: int, player: Player, vein: SpiritVein, instance: ServerInstance) -> Dictionary:
+	if player == null or vein == null or instance == null or player.is_dead:
 		return {"ok": false, "reason": "invalid"}
-	if player.global_position.distance_to(tree.global_position) > INTERACT_RANGE:
+	if player.global_position.distance_to(vein.global_position) > INTERACT_RANGE:
 		return {"ok": false, "reason": "too_far"}
 
 	var resource: PlayerResource = player.player_resource
@@ -54,25 +48,26 @@ static func start(peer_id: int, player: Player, tree: SpiritTree, instance: Serv
 		return {"ok": false, "reason": "invalid"}
 
 	resource.ensure_osrs_skills()
-	var gathering_level: int = SkillManager.get_level_from_xp(
-		resource.get_osrs_skill_xp(SkillManager.SPIRIT_GATHERING)
+	var mining_level: int = SkillManager.get_level_from_xp(
+		resource.get_osrs_skill_xp(SkillManager.MINING)
 	)
-	if gathering_level < tree.required_level:
+	if mining_level < vein.required_level:
 		_push_system_message(
 			peer_id,
-			"You need a Spirit Gathering level of %d to chop this." % tree.required_level
+			"You need a Mining level of %d to mine this." % vein.required_level
 		)
-		return {"ok": false, "reason": "level", "required_level": tree.required_level}
+		return {"ok": false, "reason": "level", "required_level": vein.required_level}
 
-	AlchemyService.stop(peer_id, "woodcutting")
-	MiningService.stop(peer_id, "woodcutting")
-	ForgingService.stop(peer_id, "woodcutting")
+	WoodcuttingService.stop(peer_id, "mining")
+	AlchemyService.stop(peer_id, "mining")
+	ForgingService.stop(peer_id, "mining")
+	OsrsCombatService.stop(peer_id, "mining")
 	stop(peer_id, "restart")
 	_ensure_tick_hook()
-	var session: Session = Session.new(peer_id, player, tree, instance)
+	var session: Session = Session.new(peer_id, player, vein, instance)
 	_sessions[peer_id] = session
-	_set_activity(player, PlayerActivityState.State.WOODCUTTING)
-	_push_state(peer_id, true, tree.name)
+	_set_activity(player, PlayerActivityState.State.MINING)
+	_push_state(peer_id, true, vein.name)
 	return {"ok": true}
 
 
@@ -92,7 +87,7 @@ static func stop_for_player(player: Player, reason: String = "cancelled") -> voi
 	stop(int(player.player_resource.current_peer_id), reason)
 
 
-static func is_woodcutting(peer_id: int) -> bool:
+static func is_mining(peer_id: int) -> bool:
 	return _sessions.has(peer_id)
 
 
@@ -121,7 +116,7 @@ static func _tick_session(peer_id: int) -> void:
 	if _player_moved(session):
 		stop(peer_id, "moved")
 		return
-	if session.player.global_position.distance_to(session.tree.global_position) > INTERACT_RANGE:
+	if session.player.global_position.distance_to(session.vein.global_position) > INTERACT_RANGE:
 		stop(peer_id, "too_far")
 		return
 
@@ -130,50 +125,42 @@ static func _tick_session(peer_id: int) -> void:
 		return
 
 	var resource: PlayerResource = session.player.player_resource
-	var roll: float = randf()
-	if roll > success_chance(resource.woodcutting_xp):
+	var mining_xp: int = resource.get_osrs_skill_xp(SkillManager.MINING)
+	if randf() > success_chance(mining_xp):
 		return
 
-	var item_id: int = session.tree.gather_item_id
+	var item_id: int = session.vein.gather_item_id
 	var add_result: Dictionary = SlotInventory.add_item(resource.slot_inventory, item_id, 1)
 	if not bool(add_result.get("ok", false)):
 		_push_error(peer_id, "Your inventory is full")
 		stop(peer_id, "inventory_full")
 		return
 
-	var gather_xp: int = maxi(1, session.tree.gather_xp)
-	var gathering_xp: Dictionary = OsrsSkillService.add_xp(
+	var gather_xp: int = maxi(1, session.vein.gather_xp)
+	var mining_result: Dictionary = OsrsSkillService.add_xp(
 		resource,
-		SkillManager.SPIRIT_GATHERING,
+		SkillManager.MINING,
 		gather_xp
 	)
-	resource.woodcutting_xp += XP_PER_SUCCESS
-	CultivationService.grant_qi(resource, QI_PER_SUCCESS)
 	if WorldServer.curr != null:
 		WorldServer.curr.database.save_player(resource)
-	CultivationService.push_to_peer(peer_id, resource)
 	InventorySlotService.push_to_peer(peer_id, resource)
 	OsrsSkillService.push_to_peer(peer_id, resource)
 	_push_result(peer_id, {
 		"ok": true,
-		"woodcutting_xp": resource.woodcutting_xp,
-		"qi_level": resource.qi_level,
-		"cultivation_realm": resource.cultivation_realm,
-		"xp_gained": XP_PER_SUCCESS,
-		"qi_gained": QI_PER_SUCCESS,
-		"tree": session.tree.name,
+		"vein": session.vein.name,
 		"item_id": item_id,
 		"item_name": ItemDatabase.get_name(item_id),
 		"item_quantity": 1,
-		"spirit_gathering_xp_gained": int(gathering_xp.get("xp_gained", 0)),
-		"spirit_gathering_level": int(gathering_xp.get("level", 1)),
-		"spirit_gathering_leveled_up": bool(gathering_xp.get("leveled_up", false)),
+		"mining_xp_gained": int(mining_result.get("xp_gained", 0)),
+		"mining_level": int(mining_result.get("level", 1)),
+		"mining_leveled_up": bool(mining_result.get("leveled_up", false)),
 	})
 
 
 static func _session_valid(session: Session) -> bool:
 	return is_instance_valid(session.player) \
-		and is_instance_valid(session.tree) \
+		and is_instance_valid(session.vein) \
 		and session.player.player_resource != null \
 		and not session.player.is_dead
 
@@ -186,12 +173,12 @@ static func _set_activity(player: Player, state: int) -> void:
 	player.activity_state = state
 
 
-static func _push_state(peer_id: int, active: bool, tree_name: String = "", reason: String = "") -> void:
+static func _push_state(peer_id: int, active: bool, vein_name: String = "", reason: String = "") -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
-	WorldServer.curr.data_push.rpc_id(peer_id, &"woodcutting.state", {
+	WorldServer.curr.data_push.rpc_id(peer_id, &"mining.state", {
 		"active": active,
-		"tree": tree_name,
+		"vein": vein_name,
 		"reason": reason,
 	})
 
@@ -199,13 +186,13 @@ static func _push_state(peer_id: int, active: bool, tree_name: String = "", reas
 static func _push_result(peer_id: int, payload: Dictionary) -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
-	WorldServer.curr.data_push.rpc_id(peer_id, &"woodcutting.result", payload)
+	WorldServer.curr.data_push.rpc_id(peer_id, &"mining.result", payload)
 
 
 static func _push_error(peer_id: int, message: String) -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
-	WorldServer.curr.data_push.rpc_id(peer_id, &"woodcutting.error", {"message": message})
+	WorldServer.curr.data_push.rpc_id(peer_id, &"mining.error", {"message": message})
 
 
 static func _push_system_message(peer_id: int, message: String) -> void:

@@ -48,7 +48,10 @@ const HEALTH_PER_LEVEL: float = 5.0
 @export var bank_inventory: Array = []
 ## Equipped gear: gear-slot key (&"weapon", &"torso", ...) -> item_id. Equipped items
 ## live here, NOT in inventory (they're moved out on equip, back on unequip).
+## OSRS gear uses keys &"head", &"chest", &"legs", &"weapon" with ItemDatabase ids.
 @export var equipment: Dictionary
+
+const OSRS_EQUIPMENT_SLOTS: Array[StringName] = [&"head", &"chest", &"legs", &"weapon"]
 
 @export var attributes: Dictionary[StringName, int]
 @export var available_attributes_points: int
@@ -208,6 +211,19 @@ func ensure_osrs_skills() -> void:
 	for skill_name: StringName in SkillManager.STARTING_SKILLS:
 		if not osrs_skills.has(skill_name):
 			osrs_skills[skill_name] = 0
+
+
+func ensure_osrs_equipment() -> void:
+	if equipment == null:
+		equipment = {}
+	for slot_key: StringName in OSRS_EQUIPMENT_SLOTS:
+		if not equipment.has(slot_key):
+			equipment[slot_key] = 0
+
+
+func get_osrs_equipped_item(slot_key: StringName) -> int:
+	ensure_osrs_equipment()
+	return int(equipment.get(slot_key, 0))
 
 
 func get_osrs_skill_xp(skill_name: StringName) -> int:

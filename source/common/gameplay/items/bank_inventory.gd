@@ -52,6 +52,15 @@ static func find_slot_with_item(slots: Array, item_id: int) -> int:
 	return -1
 
 
+## Number of bank slots currently holding an item (unique occupied slots).
+static func count_occupied_slots(slots: Array) -> int:
+	var count: int = 0
+	for slot_v: Variant in slots:
+		if not is_empty_slot(slot_v as Dictionary):
+			count += 1
+	return count
+
+
 ## Returns true when [param amount] of [param item_id] could be added without mutation.
 static func can_add_item(slots: Array, item_id: int, amount: int = 1) -> bool:
 	if item_id <= 0 or amount <= 0 or not ItemDatabase.has_item(item_id):
@@ -62,10 +71,10 @@ static func can_add_item(slots: Array, item_id: int, amount: int = 1) -> bool:
 		var have: int = int((slots[existing_index] as Dictionary).get("quantity", 0))
 		return have + amount <= MAX_STACK
 
-	var empty_slots_needed: int = 1 if amount <= MAX_STACK else 0
 	if amount > MAX_STACK:
 		return false
-	return find_first_empty_slot(slots) >= 0
+	# New item type needs a free slot — enforce the 200-slot cap on unique entries.
+	return count_occupied_slots(slots) < SLOT_COUNT
 
 
 ## Add items to the bank. Bank slots always stack by item_id. Returns { ok, reason, added }.

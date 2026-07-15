@@ -1,17 +1,17 @@
-class_name AlchemyService
+class_name ForgingService
 extends RefCounted
-## Server-authoritative alchemy loop driven by [TickManager] game ticks.
+## Server-authoritative forging loop driven by [TickManager] game ticks.
 
 
 const TICKS_PER_CRAFT: int = 3
 const INTERACT_RANGE: float = 90.0
 const MOVE_TOLERANCE: float = 2.0
-const DEFAULT_RECIPE: StringName = RecipeDatabase.RECIPE_MINOR_BLOOD_PILL
+const DEFAULT_RECIPE: StringName = RecipeDatabase.RECIPE_COPPER_SWORD
 
 class Session:
 	var peer_id: int
 	var player: Player
-	var cauldron: AlchemyCauldron
+	var anvil: ForgingAnvil
 	var instance: ServerInstance
 	var anchor_position: Vector2
 	var recipe_id: StringName
@@ -20,13 +20,13 @@ class Session:
 	func _init(
 		p_peer_id: int,
 		p_player: Player,
-		p_cauldron: AlchemyCauldron,
+		p_anvil: ForgingAnvil,
 		p_instance: ServerInstance,
 		p_recipe_id: StringName
 	) -> void:
 		peer_id = p_peer_id
 		player = p_player
-		cauldron = p_cauldron
+		anvil = p_anvil
 		instance = p_instance
 		anchor_position = p_player.global_position
 		recipe_id = p_recipe_id
@@ -39,15 +39,15 @@ static var _tick_connected: bool = false
 static func start(
 	peer_id: int,
 	player: Player,
-	cauldron: AlchemyCauldron,
+	anvil: ForgingAnvil,
 	instance: ServerInstance,
 	recipe_id: StringName = DEFAULT_RECIPE
 ) -> Dictionary:
-	if player == null or cauldron == null or instance == null or player.is_dead:
+	if player == null or anvil == null or instance == null or player.is_dead:
 		return {"ok": false, "reason": "invalid"}
 	if not RecipeDatabase.has_recipe(recipe_id):
 		return {"ok": false, "reason": "unknown_recipe"}
-	if player.global_position.distance_to(cauldron.global_position) > INTERACT_RANGE:
+	if player.global_position.distance_to(anvil.global_position) > INTERACT_RANGE:
 		return {"ok": false, "reason": "too_far"}
 
 	var resource: PlayerResource = player.player_resource
@@ -56,25 +56,25 @@ static func start(
 
 	var recipe: Dictionary = RecipeDatabase.get_recipe(recipe_id)
 	var required_level: int = int(recipe.get("level_required", 1))
-	var alchemy_level: int = SkillManager.get_level_from_xp(resource.get_osrs_skill_xp(SkillManager.ALCHEMY))
-	if alchemy_level < required_level:
+	var forging_level: int = SkillManager.get_level_from_xp(resource.get_osrs_skill_xp(SkillManager.FORGING))
+	if forging_level < required_level:
 		_push_system_message(
 			peer_id,
-			"You need an Alchemy level of %d to craft this." % required_level
+			"You need a Forging level of %d to craft this." % required_level
 		)
 		return {"ok": false, "reason": "level", "required_level": required_level}
 
-	WoodcuttingService.stop(peer_id, "alchemy")
-	MiningService.stop(peer_id, "alchemy")
-	ForgingService.stop(peer_id, "alchemy")
-	OsrsCombatService.stop(peer_id, "alchemy")
+	WoodcuttingService.stop(peer_id, "forging")
+	MiningService.stop(peer_id, "forging")
+	AlchemyService.stop(peer_id, "forging")
+	OsrsCombatService.stop(peer_id, "forging")
 	stop(peer_id, "restart")
 
 	_ensure_tick_hook()
-	var session: Session = Session.new(peer_id, player, cauldron, instance, recipe_id)
+	var session: Session = Session.new(peer_id, player, anvil, instance, recipe_id)
 	_sessions[peer_id] = session
-	_set_activity(player, PlayerActivityState.State.ALCHEMY)
-	_push_state(peer_id, true, cauldron.name)
+	_set_activity(player, PlayerActivityState.State.FORGING)
+	_push_state(peer_id, true, anvil.name)
 	return {"ok": true}
 
 
@@ -94,7 +94,7 @@ static func stop_for_player(player: Player, reason: String = "cancelled") -> voi
 	stop(int(player.player_resource.current_peer_id), reason)
 
 
-static func is_alchemizing(peer_id: int) -> bool:
+static func is_forging(peer_id: int) -> bool:
 	return _sessions.has(peer_id)
 
 
@@ -123,7 +123,7 @@ static func _tick_session(peer_id: int) -> void:
 	if _player_moved(session):
 		stop(peer_id, "moved")
 		return
-	if session.player.global_position.distance_to(session.cauldron.global_position) > INTERACT_RANGE:
+	if session.player.global_position.distance_to(session.anvil.global_position) > INTERACT_RANGE:
 		stop(peer_id, "too_far")
 		return
 
@@ -153,7 +153,7 @@ static func _tick_session(peer_id: int) -> void:
 			stop(peer_id, "inventory_full")
 			return
 
-	var skill_name: StringName = recipe.get("skill", SkillManager.ALCHEMY) as StringName
+	var skill_name: StringName = recipe.get("skill", SkillManager.FORGING) as StringName
 	var xp_result: Dictionary = OsrsSkillService.add_xp(resource, skill_name, int(recipe.get("xp_reward", 0)))
 	if WorldServer.curr != null:
 		WorldServer.curr.database.save_player(resource)
@@ -196,7 +196,7 @@ static func _consume_ingredients(slots: Array, recipe: Dictionary) -> bool:
 
 static func _session_valid(session: Session) -> bool:
 	return is_instance_valid(session.player) \
-		and is_instance_valid(session.cauldron) \
+		and is_instance_valid(session.anvil) \
 		and session.player.player_resource != null \
 		and not session.player.is_dead
 
@@ -209,12 +209,12 @@ static func _set_activity(player: Player, state: int) -> void:
 	player.activity_state = state
 
 
-static func _push_state(peer_id: int, active: bool, cauldron_name: String = "", reason: String = "") -> void:
+static func _push_state(peer_id: int, active: bool, anvil_name: String = "", reason: String = "") -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
-	WorldServer.curr.data_push.rpc_id(peer_id, &"alchemy.state", {
+	WorldServer.curr.data_push.rpc_id(peer_id, &"forging.state", {
 		"active": active,
-		"cauldron": cauldron_name,
+		"anvil": anvil_name,
 		"reason": reason,
 	})
 
@@ -222,13 +222,13 @@ static func _push_state(peer_id: int, active: bool, cauldron_name: String = "", 
 static func _push_result(peer_id: int, payload: Dictionary) -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
-	WorldServer.curr.data_push.rpc_id(peer_id, &"alchemy.result", payload)
+	WorldServer.curr.data_push.rpc_id(peer_id, &"forging.result", payload)
 
 
 static func _push_error(peer_id: int, message: String) -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
-	WorldServer.curr.data_push.rpc_id(peer_id, &"alchemy.error", {"message": message})
+	WorldServer.curr.data_push.rpc_id(peer_id, &"forging.error", {"message": message})
 
 
 static func _push_system_message(peer_id: int, message: String) -> void:

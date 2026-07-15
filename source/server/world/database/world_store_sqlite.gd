@@ -146,6 +146,7 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	player.titles_unlocked = PackedStringArray(["Alpha tester"])
 	player.display_title = "Alpha tester"
 	player.ensure_osrs_skills()
+	player.ensure_osrs_equipment()
 	# Leave defaults to PlayerResource where possible.
 	save_player(player)
 	return next_id
@@ -282,6 +283,7 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	for skill_name in osrs_skills_raw:
 		player.osrs_skills[StringName(skill_name)] = int(osrs_skills_raw[skill_name])
 	player.ensure_osrs_skills()
+	player.ensure_osrs_equipment()
 
 	var osrs_quests_raw: Dictionary = JSON.parse_string(str(row.get("osrs_quests_json", "{}"))) as Dictionary
 	player.osrs_quests = {}

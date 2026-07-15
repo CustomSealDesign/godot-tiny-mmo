@@ -9,8 +9,16 @@ const XP_LEVEL_99: int = 13_034_431
 const SPIRIT_GATHERING: StringName = &"Spirit_Gathering"
 const ALCHEMY: StringName = &"Alchemy"
 const COMBAT: StringName = &"Combat"
+const MINING: StringName = &"Mining"
+const FORGING: StringName = &"Forging"
 
-const STARTING_SKILLS: Array[StringName] = [SPIRIT_GATHERING, ALCHEMY, COMBAT]
+const STARTING_SKILLS: Array[StringName] = [
+	SPIRIT_GATHERING,
+	ALCHEMY,
+	COMBAT,
+	MINING,
+	FORGING,
+]
 
 ## Precomputed total XP required to reach each level (index = level, value = xp).
 static var _xp_for_level: PackedInt32Array = PackedInt32Array()

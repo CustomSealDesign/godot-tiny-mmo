@@ -88,8 +88,12 @@ var territory_flags: Dictionary[int, TerritoryFlag]
 var duel_masters: Dictionary[int, DuelMaster]
 ## node name -> SpiritTree. The server resolves woodcutting targets by name.
 var spirit_trees: Dictionary[StringName, SpiritTree]
+## node name -> SpiritVein. The server resolves mining targets by name.
+var spirit_veins: Dictionary[StringName, SpiritVein]
 ## node name -> AlchemyCauldron. The server resolves alchemy targets by name.
 var alchemy_cauldrons: Dictionary[StringName, AlchemyCauldron]
+## node name -> ForgingAnvil. The server resolves forging targets by name.
+var forging_anvils: Dictionary[StringName, ForgingAnvil]
 ## node name -> SectVault. The server resolves bank access by name.
 var sect_vaults: Dictionary[StringName, SectVault]
 ## node name -> Enemy. The server resolves OSRS-style combat targets by name.

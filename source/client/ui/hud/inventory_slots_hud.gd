@@ -123,7 +123,40 @@ func _on_slot_gui_input(event: InputEvent, slot_index: int) -> void:
 	)
 	if not is_consume_click:
 		return
-	_try_consume_slot(slot_index)
+	if slot_index < 0 or slot_index >= ClientState.slot_inventory.size():
+		return
+	var slot: Dictionary = ClientState.slot_inventory[slot_index] as Dictionary
+	var item_id: int = int(slot.get("item_id", 0))
+	var quantity: int = int(slot.get("quantity", 0))
+	if item_id <= 0 or quantity <= 0:
+		return
+	if ItemDatabase.is_equippable(item_id):
+		_try_equip_slot(slot_index)
+	elif ItemDatabase.is_consumable(item_id):
+		_try_consume_slot(slot_index)
+
+
+func _try_equip_slot(slot_index: int) -> void:
+	if InstanceClient.current == null:
+		return
+	Client.request_data(
+		&"equip_item",
+		_on_equip_response,
+		{"slot_index": slot_index},
+		InstanceClient.current.name,
+	)
+
+
+func _on_equip_response(payload: Variant) -> void:
+	if not (payload is Dictionary):
+		return
+	var data: Dictionary = payload as Dictionary
+	if not bool(data.get("ok", false)):
+		return
+	if data.has("slots"):
+		ClientState.apply_inventory({"slots": data.get("slots", [])})
+	if data.has("equipment"):
+		ClientState.apply_equipment({"equipment": data.get("equipment", {})})
 
 
 func _try_consume_slot(slot_index: int) -> void:

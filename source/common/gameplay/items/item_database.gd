@@ -21,14 +21,19 @@ const VOID_BEAST_CORE: int = 9014
 const BLOOD_REFINING_PILL: int = 9015
 const HEAVENLY_TRIBULATION_PILL: int = 9016
 const VOID_DAO_PILL: int = 9017
+const SPIRIT_COPPER_ORE: int = 9018
+const METEOR_IRON_ORE: int = 9019
+const COPPER_SWORD: int = 9020
+const METEOR_IRON_CHESTPLATE: int = 9021
 
-## item_id -> { "name": String, "stackable": bool, "icon": String, "qi_value": int }
+## item_id -> { "name": String, "stackable": bool, "icon": String, "qi_value": int, "equip_slot": String }
 const ITEMS: Dictionary = {
 	SPIRIT_WOOD: {
 		"name": "Spirit Wood",
 		"stackable": false,
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_10.png",
 		"qi_value": 5,
+		"equip_slot": "",
 	},
 	LOW_GRADE_SPIRIT_STONE: {
 		"name": "Low-Grade Spirit Stone",
@@ -126,6 +131,32 @@ const ITEMS: Dictionary = {
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
 		"qi_value": 100000,
 	},
+	SPIRIT_COPPER_ORE: {
+		"name": "Spirit Copper Ore",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
+		"qi_value": 0,
+	},
+	METEOR_IRON_ORE: {
+		"name": "Meteor Iron Ore",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
+		"qi_value": 0,
+	},
+	COPPER_SWORD: {
+		"name": "Copper Sword",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 0,
+		"equip_slot": "weapon",
+	},
+	METEOR_IRON_CHESTPLATE: {
+		"name": "Meteor Iron Chestplate",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 0,
+		"equip_slot": "chest",
+	},
 }
 
 
@@ -151,6 +182,14 @@ static func is_consumable(item_id: int) -> bool:
 
 static func get_icon_path(item_id: int) -> String:
 	return str(ITEMS.get(item_id, {}).get("icon", ""))
+
+
+static func get_equip_slot(item_id: int) -> String:
+	return str(ITEMS.get(item_id, {}).get("equip_slot", ""))
+
+
+static func is_equippable(item_id: int) -> bool:
+	return not get_equip_slot(item_id).is_empty()
 
 
 static func load_icon(item_id: int) -> Texture2D:

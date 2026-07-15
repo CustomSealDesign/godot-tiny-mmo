@@ -253,6 +253,10 @@ func instantiate_player(peer_id: int) -> Player:
 		player_resource.equipment.clear()
 		for slot_key: StringName in saved_equipment:
 			var equip_id: int = int(saved_equipment[slot_key])
+			# OSRS slot-inventory gear (ItemDatabase ids) is synced separately.
+			if ItemDatabase.is_equippable(equip_id):
+				player_resource.equipment[slot_key] = equip_id
+				continue
 			if new_player.equipment_component.equip_item(equip_id):
 				player_resource.equipment[slot_key] = equip_id
 			else:

@@ -8,12 +8,14 @@ extends Control
 @onready var _tabs: Dictionary[StringName, Button] = {
 	&"stats": %StatsTab,
 	&"skills": %SkillsTab,
+	&"equipment": %EquipmentTab,
 	&"jobs": %JobsTab,
 	&"mastery": %MasteryTab,
 }
 @onready var _panels: Dictionary[StringName, Control] = {
 	&"stats": %StatsContent,
 	&"skills": %SkillsContent,
+	&"equipment": %EquipmentContent,
 	&"jobs": %JobsContent,
 	&"mastery": %MasteryContent,
 }
