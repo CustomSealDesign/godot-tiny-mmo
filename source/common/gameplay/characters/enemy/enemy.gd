@@ -4,9 +4,20 @@ extends Node2D
 ## tile and sends start_combat on arrival; the server drives tick-based damage.
 
 
+enum Animations {
+	IDLE,
+	RUN,
+	DEATH,
+}
+
 const INTERACT_RANGE: float = OsrsCombatService.INTERACT_RANGE
 const RESPAWN_SECONDS: float = 10.0
 const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/components/interactable_marker.tscn")
+
+const WALK_ANIM_FPS: float = 5.0
+const IDLE_SPRITE_FRAME: int = 0
+const WALK_SPRITE_FRAME_FIRST: int = 1
+const WALK_SPRITE_FRAME_LAST: int = 5
 
 @export var display_name: String = "Spirit Wolf"
 @export var max_hp: int = 20
@@ -15,6 +26,7 @@ const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/com
 @export var attack_damage: int = 5
 @export var loot_item_id: int = ItemDatabase.WOLF_CORE
 @export var loot_quantity: int = 1
+@export var move_speed: float = 54.0
 @export var floor_collision_mask: int = 1
 @export var floor_probe_height: float = 32.0
 @export var floor_probe_depth: float = 64.0
@@ -22,10 +34,22 @@ const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/com
 var current_hp: int = 20
 var is_dead: bool = false
 
+var anim: Animations = Animations.IDLE:
+	set = _set_anim
+
 var _interactable_hovered: bool = false
 var _respawn_timer: SceneTreeTimer
+var _walk_anim_time: float = 0.0
+var _walk_sprite_frame: int = WALK_SPRITE_FRAME_FIRST
+var _in_combat: bool = false
+var _current_path: PackedVector2Array = PackedVector2Array()
+var _path_index: int = 0
+var _target_plane: Vector2 = Vector2.ZERO
+var _is_moving: bool = false
+var _move_direction: Vector2 = Vector2.ZERO
 
 @onready var _visual_root: Node3D = $Visual3D
+@onready var _sprite_billboard: Sprite3D = $Visual3D/Sprite3D
 @onready var _click_area: ClickableArea = $ClickArea
 @onready var _health_bar: ProgressBar = $HealthBar
 @onready var _name_label: Label = $NameLabel
@@ -49,6 +73,8 @@ func _ready() -> void:
 	_click_area.tree_exiting.connect(_set_interactable_hover.bind(false))
 	_spawn_marker()
 	_sync_visual_from_plane()
+	_apply_sprite_anim_state()
+	Client.subscribe(&"combat.state", _on_combat_state)
 	if ClientState.local_player != null:
 		_mark_tile_solid()
 	else:
@@ -58,6 +84,19 @@ func _ready() -> void:
 func _on_local_player_ready(_lp: LocalPlayer) -> void:
 	if not is_dead:
 		_mark_tile_solid()
+
+
+func _physics_process(delta: float) -> void:
+	if multiplayer.is_server():
+		return
+	_process_grid_movement(delta)
+	_sync_visual_from_plane()
+
+
+func _process(delta: float) -> void:
+	if multiplayer.is_server():
+		return
+	_advance_sprite_animation(delta)
 
 
 func get_attack_damage() -> int:
@@ -96,8 +135,11 @@ func apply_sync(payload: Dictionary) -> void:
 	if was_dead != is_dead:
 		if is_dead:
 			_clear_tile_solid()
+			_stop_grid_movement()
+			anim = Animations.DEATH
 		else:
 			_mark_tile_solid()
+			anim = Animations.IDLE
 
 
 func _die(instance: ServerInstance) -> void:
@@ -106,7 +148,9 @@ func _die(instance: ServerInstance) -> void:
 	is_dead = true
 	OsrsCombatService.stop_for_enemy(self, "enemy_dead")
 	_clear_tile_solid()
+	_stop_grid_movement()
 	_set_dead_visual(true)
+	anim = Animations.DEATH
 	OsrsCombatService.push_enemy_update(instance, self)
 
 	var grid: Vector2i = GridMovement.plane_to_grid(global_position)
@@ -124,8 +168,99 @@ func _respawn(instance: ServerInstance) -> void:
 	_update_health_bar()
 	_set_dead_visual(false)
 	_mark_tile_solid()
+	anim = Animations.IDLE
 	if instance != null and is_instance_valid(instance):
 		OsrsCombatService.push_enemy_update(instance, self)
+
+
+func move_to_plane(destination_plane: Vector2) -> void:
+	if is_dead or _in_combat:
+		return
+	var pathfinder: GridPathfinder = _enemy_pathfinder()
+	if pathfinder == null:
+		return
+
+	_stop_grid_movement()
+
+	var snapped_destination: Vector2 = GridMovement.snap_plane(destination_plane)
+	_current_path = pathfinder.find_path(global_position, snapped_destination)
+	if _current_path.is_empty():
+		return
+
+	_path_index = 0
+	if _current_path.size() > 1 \
+			and _current_path[0].distance_to(global_position) < GridMovement.WAYPOINT_REACHED_DIST:
+		_path_index = 1
+	_set_grid_target()
+
+
+func _stop_grid_movement() -> void:
+	_is_moving = false
+	_current_path = PackedVector2Array()
+	_path_index = 0
+	_move_direction = Vector2.ZERO
+	if not is_dead and not _in_combat:
+		anim = Animations.IDLE
+
+
+func _set_grid_target() -> void:
+	if _path_index < _current_path.size():
+		_target_plane = _current_path[_path_index]
+		_is_moving = true
+		anim = Animations.RUN
+	else:
+		_finish_grid_movement()
+
+
+func _finish_grid_movement() -> void:
+	_stop_grid_movement()
+	global_position = GridMovement.snap_plane(global_position)
+	_sync_visual_from_plane()
+
+
+func _process_grid_movement(delta: float) -> void:
+	if is_dead or _in_combat:
+		_stop_grid_movement()
+		return
+
+	if not _is_moving or _current_path.is_empty():
+		return
+
+	var direction_plane: Vector2 = _target_plane - global_position
+	var distance: float = direction_plane.length()
+	if distance <= GridMovement.WAYPOINT_REACHED_DIST:
+		global_position = _target_plane
+		_path_index += 1
+		if _path_index < _current_path.size():
+			_set_grid_target()
+		else:
+			_finish_grid_movement()
+		return
+
+	_move_direction = direction_plane.normalized()
+	global_position += _move_direction * move_speed * delta
+	_update_sprite_facing()
+	anim = Animations.RUN
+
+	if global_position.distance_to(_target_plane) <= GridMovement.WAYPOINT_REACHED_DIST:
+		global_position = _target_plane
+		_path_index += 1
+		if _path_index < _current_path.size():
+			_set_grid_target()
+		else:
+			_finish_grid_movement()
+
+
+func _on_combat_state(payload: Dictionary) -> void:
+	var active: bool = bool(payload.get("active", false))
+	var enemy_name: String = str(payload.get("enemy", ""))
+	var was_in_combat: bool = _in_combat
+	_in_combat = active and enemy_name == String(name)
+	if _in_combat:
+		_stop_grid_movement()
+		anim = Animations.IDLE
+	elif was_in_combat and not is_dead:
+		anim = Animations.IDLE
 
 
 func _on_clicked() -> void:
@@ -221,6 +356,13 @@ func _clear_tile_solid() -> void:
 	lp.pathfinder.clear_solid(GridMovement.plane_to_grid(global_position))
 
 
+func _enemy_pathfinder() -> GridPathfinder:
+	var lp: LocalPlayer = ClientState.local_player
+	if lp == null or lp.pathfinder == null:
+		return null
+	return lp.pathfinder
+
+
 func _sync_visual_from_plane() -> void:
 	if _visual_root == null:
 		return
@@ -254,3 +396,43 @@ func _physics_space() -> PhysicsDirectSpaceState3D:
 	if world_3d != null:
 		return world_3d.direct_space_state
 	return null
+
+
+func _set_anim(new_anim: Animations) -> void:
+	if anim == new_anim:
+		return
+	anim = new_anim
+	_apply_sprite_anim_state()
+
+
+func _apply_sprite_anim_state() -> void:
+	if _sprite_billboard == null:
+		return
+	match anim:
+		Animations.IDLE, Animations.DEATH:
+			_walk_anim_time = 0.0
+			_walk_sprite_frame = WALK_SPRITE_FRAME_FIRST
+			_sprite_billboard.frame = IDLE_SPRITE_FRAME
+		Animations.RUN:
+			_walk_anim_time = 0.0
+			_walk_sprite_frame = WALK_SPRITE_FRAME_FIRST
+			_sprite_billboard.frame = WALK_SPRITE_FRAME_FIRST
+
+
+func _advance_sprite_animation(delta: float) -> void:
+	if _sprite_billboard == null or anim != Animations.RUN:
+		return
+	_walk_anim_time += delta
+	var frame_duration: float = 1.0 / WALK_ANIM_FPS
+	while _walk_anim_time >= frame_duration:
+		_walk_anim_time -= frame_duration
+		_walk_sprite_frame += 1
+		if _walk_sprite_frame > WALK_SPRITE_FRAME_LAST:
+			_walk_sprite_frame = WALK_SPRITE_FRAME_FIRST
+	_sprite_billboard.frame = _walk_sprite_frame
+
+
+func _update_sprite_facing() -> void:
+	if _sprite_billboard == null or _move_direction.length_squared() <= 0.0001:
+		return
+	_sprite_billboard.flip_h = _move_direction.x < 0.0
