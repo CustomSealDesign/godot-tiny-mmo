@@ -1,0 +1,12 @@
+{
+  "9001": {
+    "name": "Spirit Wood",
+    "stackable": false,
+    "icon": "res://assets/sprites/items/icons/mystic/Inventory_10.png"
+  },
+  "9002": {
+    "name": "Low-Grade Spirit Stone",
+    "stackable": true,
+    "icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png"
+  }
+}

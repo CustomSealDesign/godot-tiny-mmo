@@ -39,6 +39,9 @@ var qi_level: int = 0
 var cultivation_realm: String = "Mortal"
 var woodcutting_xp: int = 0
 signal cultivation_changed
+## OSRS-style 28-slot bag mirrored from inventory.update / inventory.slots.get.
+var slot_inventory: Array = []
+signal inventory_changed
 ## True while a blocking menu is open (NPC dialogue, shop, quest log, inventory).
 ## While set, the local player's movement and actions are suppressed, so you can't
 ## walk or fight with a menu up, and can't keep one open to act from afar. Only the
@@ -113,8 +116,10 @@ func _ready() -> void:
 	Client.subscribe(&"active_guild_id.set", func(payload: Dictionary):
 		active_guild_id = payload.get("active_guild_id", 0))
 	Client.subscribe(&"cultivation.update", apply_cultivation)
+	Client.subscribe(&"inventory.update", apply_inventory)
 	Client.subscribe(&"cultivation.breakthrough", _on_cultivation_breakthrough)
 	Client.subscribe(&"woodcutting.result", _on_woodcutting_result)
+	Client.subscribe(&"woodcutting.error", _on_woodcutting_error)
 	Client.subscribe(&"stats.get", func(data: Dictionary):
 		stats.data.merge(data, true)
 	)
@@ -141,6 +146,13 @@ func apply_cultivation(data: Dictionary) -> void:
 	cultivation_realm = str(data.get("cultivation_realm", cultivation_realm))
 	woodcutting_xp = int(data.get("woodcutting_xp", woodcutting_xp))
 	cultivation_changed.emit()
+
+
+func apply_inventory(data: Dictionary) -> void:
+	var slots_v: Variant = data.get("slots", [])
+	if slots_v is Array:
+		slot_inventory = slots_v
+		inventory_changed.emit()
 
 
 func _on_cultivation_breakthrough(data: Dictionary) -> void:
@@ -175,7 +187,16 @@ func _on_woodcutting_result(data: Dictionary) -> void:
 	var lines: PackedStringArray = PackedStringArray()
 	lines.append("+%d Woodcutting XP" % int(data.get("xp_gained", 0)))
 	lines.append("+%d Qi" % int(data.get("qi_gained", 0)))
+	var item_name: String = str(data.get("item_name", ""))
+	if not item_name.is_empty():
+		lines.append("+1 %s" % item_name)
 	Toaster.toast_group("Spirit Tree", lines)
+
+
+func _on_woodcutting_error(data: Dictionary) -> void:
+	var message: String = str(data.get("message", ""))
+	if not message.is_empty():
+		Toaster.toast(message)
 
 
 ## Server-pushed kill rewards: surface them as ONE grouped toast card

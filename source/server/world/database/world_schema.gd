@@ -33,6 +33,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 8:
 		_migration_v8(db)
 		_set_schema_version(db, 8)
+	if version < 9:
+		_migration_v9(db)
+		_set_schema_version(db, 9)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -196,6 +199,12 @@ static func _migration_v8(db: SQLite) -> void:
 		db.query("ALTER TABLE players ADD COLUMN cultivation_realm TEXT NOT NULL DEFAULT 'Mortal';")
 	if not _column_exists(db, "players", "woodcutting_xp"):
 		db.query("ALTER TABLE players ADD COLUMN woodcutting_xp INTEGER NOT NULL DEFAULT 0;")
+
+
+## v9: OSRS-style 28-slot inventory array (item_id + quantity per slot).
+static func _migration_v9(db: SQLite) -> void:
+	if not _column_exists(db, "players", "slot_inventory_json"):
+		db.query("ALTER TABLE players ADD COLUMN slot_inventory_json TEXT NOT NULL DEFAULT '[]';")
 
 
 static func _column_exists(db: SQLite, table: String, column: String) -> bool:

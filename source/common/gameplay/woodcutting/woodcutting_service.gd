@@ -8,6 +8,7 @@ const INTERACT_RANGE: float = 90.0
 const MOVE_TOLERANCE: float = 2.0
 const XP_PER_SUCCESS: int = 10
 const QI_PER_SUCCESS: int = 5
+const SPIRIT_WOOD_ITEM_ID: int = ItemDatabase.SPIRIT_WOOD
 
 class Session:
 	var peer_id: int
@@ -115,11 +116,18 @@ static func _tick_session(peer_id: int) -> void:
 	if roll > success_chance(resource.woodcutting_xp):
 		return
 
+	var add_result: Dictionary = SlotInventory.add_item(resource.slot_inventory, SPIRIT_WOOD_ITEM_ID, 1)
+	if not bool(add_result.get("ok", false)):
+		_push_error(peer_id, "Your inventory is full")
+		stop(peer_id, "inventory_full")
+		return
+
 	resource.woodcutting_xp += XP_PER_SUCCESS
 	CultivationService.grant_qi(resource, QI_PER_SUCCESS)
 	if WorldServer.curr != null:
 		WorldServer.curr.database.save_player(resource)
 	CultivationService.push_to_peer(peer_id, resource)
+	InventorySlotService.push_to_peer(peer_id, resource)
 	_push_result(peer_id, {
 		"ok": true,
 		"woodcutting_xp": resource.woodcutting_xp,
@@ -128,6 +136,9 @@ static func _tick_session(peer_id: int) -> void:
 		"xp_gained": XP_PER_SUCCESS,
 		"qi_gained": QI_PER_SUCCESS,
 		"tree": session.tree.name,
+		"item_id": SPIRIT_WOOD_ITEM_ID,
+		"item_name": ItemDatabase.get_name(SPIRIT_WOOD_ITEM_ID),
+		"item_quantity": 1,
 	})
 
 
@@ -160,3 +171,9 @@ static func _push_result(peer_id: int, payload: Dictionary) -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
 	WorldServer.curr.data_push.rpc_id(peer_id, &"woodcutting.result", payload)
+
+
+static func _push_error(peer_id: int, message: String) -> void:
+	if WorldServer.curr == null or peer_id <= 0:
+		return
+	WorldServer.curr.data_push.rpc_id(peer_id, &"woodcutting.error", {"message": message})

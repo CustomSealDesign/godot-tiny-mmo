@@ -1,0 +1,114 @@
+class_name SlotInventory
+extends RefCounted
+## Stateless helpers for the fixed 28-slot OSRS-style inventory array.
+##
+## Format: Array[Dictionary] length 28, each slot:
+##     { "item_id": int, "quantity": int }
+## Empty slots use item_id 0 and quantity 0.
+
+
+const SLOT_COUNT: int = 28
+const MAX_STACK: int = 2147483647
+
+
+static func empty_slots() -> Array:
+	var slots: Array = []
+	slots.resize(SLOT_COUNT)
+	for i: int in SLOT_COUNT:
+		slots[i] = _empty_slot()
+	return slots
+
+
+static func normalize(raw: Variant) -> Array:
+	var slots: Array = empty_slots()
+	if raw is Array:
+		for i: int in mini(raw.size(), SLOT_COUNT):
+			var entry: Variant = raw[i]
+			if entry is Dictionary:
+				slots[i] = _normalize_slot(entry as Dictionary)
+	return slots
+
+
+static func is_empty_slot(slot: Dictionary) -> bool:
+	return int(slot.get("item_id", 0)) <= 0 or int(slot.get("quantity", 0)) <= 0
+
+
+static func find_first_empty_slot(slots: Array) -> int:
+	for i: int in slots.size():
+		if is_empty_slot(slots[i] as Dictionary):
+			return i
+	return -1
+
+
+## Add items to the bag. Returns { ok, reason, added }.
+## reason is "full" when no room remains.
+static func add_item(slots: Array, item_id: int, amount: int = 1) -> Dictionary:
+	if item_id <= 0 or amount <= 0:
+		return {"ok": false, "reason": "invalid", "added": 0}
+	if not ItemDatabase.has_item(item_id):
+		return {"ok": false, "reason": "unknown_item", "added": 0}
+
+	var remaining: int = amount
+	if ItemDatabase.is_stackable(item_id):
+		remaining = _stack_into_existing(slots, item_id, remaining)
+		while remaining > 0:
+			var empty_index: int = find_first_empty_slot(slots)
+			if empty_index < 0:
+				break
+			var to_place: int = mini(remaining, MAX_STACK)
+			slots[empty_index] = {"item_id": item_id, "quantity": to_place}
+			remaining -= to_place
+	else:
+		while remaining > 0:
+			var empty_index: int = find_first_empty_slot(slots)
+			if empty_index < 0:
+				break
+			slots[empty_index] = {"item_id": item_id, "quantity": 1}
+			remaining -= 1
+
+	var added: int = amount - remaining
+	if added <= 0:
+		return {"ok": false, "reason": "full", "added": 0}
+	return {"ok": true, "reason": "", "added": added}
+
+
+static func to_payload(slots: Array) -> Array:
+	var out: Array = []
+	for slot_v: Variant in slots:
+		var slot: Dictionary = slot_v as Dictionary
+		out.append({
+			"item_id": int(slot.get("item_id", 0)),
+			"quantity": int(slot.get("quantity", 0)),
+		})
+	return out
+
+
+static func _empty_slot() -> Dictionary:
+	return {"item_id": 0, "quantity": 0}
+
+
+static func _normalize_slot(raw: Dictionary) -> Dictionary:
+	var item_id: int = int(raw.get("item_id", 0))
+	var quantity: int = int(raw.get("quantity", 0))
+	if item_id <= 0 or quantity <= 0:
+		return _empty_slot()
+	return {"item_id": item_id, "quantity": quantity}
+
+
+static func _stack_into_existing(slots: Array, item_id: int, amount: int) -> int:
+	var remaining: int = amount
+	for i: int in slots.size():
+		var slot: Dictionary = slots[i] as Dictionary
+		if int(slot.get("item_id", 0)) != item_id:
+			continue
+		var have: int = int(slot.get("quantity", 0))
+		if have >= MAX_STACK:
+			continue
+		var room: int = MAX_STACK - have
+		var to_add: int = mini(room, remaining)
+		slot["quantity"] = have + to_add
+		slots[i] = slot
+		remaining -= to_add
+		if remaining <= 0:
+			break
+	return remaining
