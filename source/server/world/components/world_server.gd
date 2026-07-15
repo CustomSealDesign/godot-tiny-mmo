@@ -171,6 +171,11 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 		token_list.erase(auth_token)
 		data_push.rpc_id.call_deferred(peer_id, &"player_id.set", {"player_id": connected_players[peer_id].player_id})
 		data_push.rpc_id.call_deferred(peer_id, &"active_guild_id.set", {"active_guild_id": connected_players[peer_id].active_guild_id})
+		data_push.rpc_id.call_deferred(
+			peer_id,
+			&"cultivation.update",
+			CultivationService.payload(connected_players[peer_id])
+		)
 	else:
 		peer.disconnect_peer(peer_id)
 

@@ -34,6 +34,11 @@ var player_id: int
 ## spawn/map change + combat.reward pushes — see HUD._apply_progression). Client-side
 ## cosmetic checks only (e.g. a gated Portal suppressing its fade); the server enforces.
 var player_level: int = 1
+## Xianxia cultivation state mirrored from cultivation.get / cultivation.update pushes.
+var qi_level: int = 0
+var cultivation_realm: String = "Mortal"
+var woodcutting_xp: int = 0
+signal cultivation_changed
 ## True while a blocking menu is open (NPC dialogue, shop, quest log, inventory).
 ## While set, the local player's movement and actions are suppressed, so you can't
 ## walk or fight with a menu up, and can't keep one open to act from afar. Only the
@@ -107,6 +112,7 @@ func _ready() -> void:
 		player_id = payload.get("player_id", 0))
 	Client.subscribe(&"active_guild_id.set", func(payload: Dictionary):
 		active_guild_id = payload.get("active_guild_id", 0))
+	Client.subscribe(&"cultivation.update", apply_cultivation)
 	Client.subscribe(&"stats.get", func(data: Dictionary):
 		stats.data.merge(data, true)
 	)
@@ -126,6 +132,13 @@ func _ready() -> void:
 	# Saved keybinds must hold from boot (gateway, menus) — not only once the
 	# local player's InputComponent spawns.
 	InputComponent.apply_saved_binds()
+
+
+func apply_cultivation(data: Dictionary) -> void:
+	qi_level = int(data.get("qi_level", qi_level))
+	cultivation_realm = str(data.get("cultivation_realm", cultivation_realm))
+	woodcutting_xp = int(data.get("woodcutting_xp", woodcutting_xp))
+	cultivation_changed.emit()
 
 
 ## Server-pushed kill rewards: surface them as ONE grouped toast card

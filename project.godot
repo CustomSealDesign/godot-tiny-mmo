@@ -33,6 +33,7 @@ ClientState="*res://source/client/autoload/client_state.gd"
 Client="*res://source/client/autoload/client.tscn"
 Toaster="*res://source/client/autoload/toaster.gd"
 Transition="*res://source/client/autoload/transition.gd"
+TickManager="*res://source/common/gameplay/time/tick_manager.gd"
 
 [debug]
 

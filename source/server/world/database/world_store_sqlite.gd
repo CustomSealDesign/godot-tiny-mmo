@@ -63,11 +63,11 @@ func save_player(player: PlayerResource) -> void:
 
 	db.query_with_bindings(
 		"INSERT OR REPLACE INTO players("
-		+ "player_id, account_name, display_name, skin_id, level, experience, available_attributes_points, "
+		+ "player_id, account_name, display_name, skin_id, level, experience, qi_level, cultivation_realm, woodcutting_xp, available_attributes_points, "
 		+ "profile_status, profile_animation, "
 		+ "attributes_json, inventory_json, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -75,6 +75,9 @@ func save_player(player: PlayerResource) -> void:
 			player.skin_id,
 			player.level,
 			player.experience,
+			player.qi_level,
+			player.cultivation_realm,
+			player.woodcutting_xp,
 			player.available_attributes_points,
 
 			player.profile_status,
@@ -226,6 +229,9 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 
 	player.level = int(row.get("level", 1))
 	player.experience = int(row.get("experience", 0))
+	player.qi_level = int(row.get("qi_level", 0))
+	player.cultivation_realm = str(row.get("cultivation_realm", "Mortal"))
+	player.woodcutting_xp = int(row.get("woodcutting_xp", 0))
 
 	player.profile_status = str(row.get("profile_status", ""))
 	player.profile_animation = str(row.get("profile_animation", ""))
