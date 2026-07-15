@@ -88,6 +88,10 @@ var territory_flags: Dictionary[int, TerritoryFlag]
 var duel_masters: Dictionary[int, DuelMaster]
 ## node name -> SpiritTree. The server resolves woodcutting targets by name.
 var spirit_trees: Dictionary[StringName, SpiritTree]
+## node name -> Enemy. The server resolves OSRS-style combat targets by name.
+var enemies: Dictionary[StringName, Enemy]
+## ground item id -> GroundItem. The server resolves floor loot pickups by id.
+var ground_items: Dictionary[int, GroundItem]
 
 
 ## Walk up from [param node] to the Map that owns it, or null. Map components

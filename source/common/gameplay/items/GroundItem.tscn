@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://dgrounditemscene"]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/ground_item.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/clickable_area.tscn" id="2_click"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_click"]
+size = Vector2(40, 40)
+
+[node name="GroundItem" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Visual3D" type="Node3D" parent="."]
+
+[node name="Sprite3D" type="Sprite3D" parent="Visual3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+billboard = 1
+pixel_size = 0.01
+
+[node name="ClickArea" parent="." instance=ExtResource("2_click")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClickArea"]
+shape = SubResource("RectangleShape2D_click")
+
+[node name="QuantityLabel" type="Label" parent="."]
+offset_left = 8.0
+offset_top = -8.0
+offset_right = 32.0
+offset_bottom = 8.0
+theme_override_colors/font_color = Color(1, 0.95, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+text = "1"
