@@ -116,5 +116,5 @@ func _fit_box() -> void:
 	if _box == null or _text == null:
 		return
 	var content_h: float = _text.get_content_height()
-	var needed: float = 22.0 + 8.0 + content_h + BUTTON_HEIGHT + 8.0 + 24.0
+	var needed: float = 22.0 + 8.0 + content_h + BUTTON_HEIGHT + 8.0 + float(SCROLL_MARGIN_TOP + SCROLL_MARGIN_BOTTOM)
 	_box.offset_top = _box.offset_bottom - maxf(needed, 120.0)
