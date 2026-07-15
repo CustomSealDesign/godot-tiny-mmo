@@ -7,6 +7,7 @@ const TICKS_PER_ROLL: int = 3
 const INTERACT_RANGE: float = 90.0
 const MOVE_TOLERANCE: float = 2.0
 const XP_PER_SUCCESS: int = 10
+const SPIRIT_GATHERING_XP: int = 25
 const QI_PER_SUCCESS: int = 5
 const SPIRIT_WOOD_ITEM_ID: int = ItemDatabase.SPIRIT_WOOD
 
@@ -123,12 +124,18 @@ static func _tick_session(peer_id: int) -> void:
 		stop(peer_id, "inventory_full")
 		return
 
+	var gathering_xp: Dictionary = OsrsSkillService.add_xp(
+		resource,
+		SkillManager.SPIRIT_GATHERING,
+		SPIRIT_GATHERING_XP
+	)
 	resource.woodcutting_xp += XP_PER_SUCCESS
 	CultivationService.grant_qi(resource, QI_PER_SUCCESS)
 	if WorldServer.curr != null:
 		WorldServer.curr.database.save_player(resource)
 	CultivationService.push_to_peer(peer_id, resource)
 	InventorySlotService.push_to_peer(peer_id, resource)
+	OsrsSkillService.push_to_peer(peer_id, resource)
 	_push_result(peer_id, {
 		"ok": true,
 		"woodcutting_xp": resource.woodcutting_xp,
@@ -140,6 +147,9 @@ static func _tick_session(peer_id: int) -> void:
 		"item_id": SPIRIT_WOOD_ITEM_ID,
 		"item_name": ItemDatabase.get_name(SPIRIT_WOOD_ITEM_ID),
 		"item_quantity": 1,
+		"spirit_gathering_xp_gained": int(gathering_xp.get("xp_gained", 0)),
+		"spirit_gathering_level": int(gathering_xp.get("level", 1)),
+		"spirit_gathering_leveled_up": bool(gathering_xp.get("leveled_up", false)),
 	})
 
 

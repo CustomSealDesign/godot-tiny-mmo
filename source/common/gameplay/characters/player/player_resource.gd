@@ -69,6 +69,10 @@ const HEALTH_PER_LEVEL: float = 5.0
 ## Starting skills: Spirit_Gathering, Alchemy, Combat. Persisted as osrs_skills_json.
 @export var osrs_skills: Dictionary = {}
 
+## OSRS-style dialogue quests: quest_id (StringName) -> state int (0 unstarted, 1 in progress, 2 completed).
+## Persisted as osrs_quests_json and synced to the client like osrs_skills.
+@export var osrs_quests: Dictionary = {}
+
 ## Weapon mastery: category (&"wand", ...) -> {"level": int, "xp": int, "spent": Dictionary}.
 ## "spent" holds the bought mastery-tree node ids (node_id (String) -> true).
 ## Persisted as JSON (mastery_json column) together with ability_loadout.
@@ -206,6 +210,14 @@ func ensure_osrs_skills() -> void:
 func get_osrs_skill_xp(skill_name: StringName) -> int:
 	ensure_osrs_skills()
 	return int(osrs_skills.get(skill_name, 0))
+
+
+func get_osrs_quest_state(quest_id: StringName) -> int:
+	return int(osrs_quests.get(quest_id, QuestDatabase.State.UNSTARTED))
+
+
+func set_osrs_quest_state(quest_id: StringName, state: int) -> void:
+	osrs_quests[quest_id] = clampi(state, QuestDatabase.State.UNSTARTED, QuestDatabase.State.COMPLETED)
 
 
 func set_character_flag(flag: StringName) -> void:

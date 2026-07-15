@@ -36,6 +36,7 @@ Transition="*res://source/client/autoload/transition.gd"
 TickManager="*res://source/common/gameplay/time/tick_manager.gd"
 SkillManager="*res://source/common/gameplay/skills/skill_manager.gd"
 RecipeDatabase="*res://source/common/gameplay/crafting/recipe_database.gd"
+QuestDatabase="*res://source/common/gameplay/quests/quest_database.gd"
 
 [debug]
 

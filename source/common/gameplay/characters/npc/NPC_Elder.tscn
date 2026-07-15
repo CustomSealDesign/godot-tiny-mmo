@@ -1,0 +1,56 @@
+[gd_scene load_steps=9 format=3 uid="uid://npceldersectscene"]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/dialogue_npc.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/clickable_area.tscn" id="2_click"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_robe"]
+top_radius = 0.35
+bottom_radius = 0.55
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_robe"]
+albedo_color = Color(0.42, 0.18, 0.62, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.3
+height = 0.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_head"]
+albedo_color = Color(0.86, 0.74, 0.62, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_click"]
+size = Vector2(72, 72)
+
+[node name="NPC_Elder" type="Node2D"]
+script = ExtResource("1_script")
+npc_id = &"sect_elder"
+display_name = "Sect Elder"
+
+[node name="Visual3D" type="Node3D" parent="."]
+
+[node name="Robe" type="MeshInstance3D" parent="Visual3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+mesh = SubResource("CylinderMesh_robe")
+surface_material_override/0 = SubResource("StandardMaterial3D_robe")
+
+[node name="Head" type="MeshInstance3D" parent="Visual3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+mesh = SubResource("SphereMesh_head")
+surface_material_override/0 = SubResource("StandardMaterial3D_head")
+
+[node name="ClickArea" parent="." instance=ExtResource("2_click")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClickArea"]
+shape = SubResource("RectangleShape2D_click")
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = -56.0
+offset_top = -104.0
+offset_right = 56.0
+offset_bottom = -88.0
+theme_override_colors/font_color = Color(0.92, 0.9, 0.72, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+text = "Sect Elder"
+horizontal_alignment = 1
