@@ -36,6 +36,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 9:
 		_migration_v9(db)
 		_set_schema_version(db, 9)
+	if version < 10:
+		_migration_v10(db)
+		_set_schema_version(db, 10)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -205,6 +208,12 @@ static func _migration_v8(db: SQLite) -> void:
 static func _migration_v9(db: SQLite) -> void:
 	if not _column_exists(db, "players", "slot_inventory_json"):
 		db.query("ALTER TABLE players ADD COLUMN slot_inventory_json TEXT NOT NULL DEFAULT '[]';")
+
+
+## v10: OSRS-style skill XP blob (Spirit_Gathering, Alchemy, Combat).
+static func _migration_v10(db: SQLite) -> void:
+	if not _column_exists(db, "players", "osrs_skills_json"):
+		db.query("ALTER TABLE players ADD COLUMN osrs_skills_json TEXT NOT NULL DEFAULT '{}';")
 
 
 static func _column_exists(db: SQLite, table: String, column: String) -> bool:

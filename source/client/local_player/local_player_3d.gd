@@ -33,6 +33,7 @@ var _trauma: float = 0.0
 var _net_send_accum: float = 0.0
 var _woodcutting: bool = false
 var _combat: bool = false
+var _alchemizing: bool = false
 
 var pathfinder: GridPathfinder
 var _current_path: PackedVector2Array = PackedVector2Array()
@@ -93,6 +94,7 @@ func _ready() -> void:
 	Client.subscribe(&"equip.cast", _on_equip_cast)
 	Client.subscribe(&"equip.done", _on_equip_done)
 	Client.subscribe(&"woodcutting.state", _on_woodcutting_state)
+	Client.subscribe(&"alchemy.state", _on_alchemy_state)
 	Client.subscribe(&"combat.state", _on_combat_state)
 	Client.subscribe(&"combat.enemy_update", _on_combat_enemy_update)
 	Client.subscribe(&"system.message", _on_system_message)
@@ -130,6 +132,8 @@ func move_to_plane(destination_plane: Vector2, interact_target: Node = null) -> 
 		request_stop_woodcutting()
 	if _combat:
 		request_stop_combat()
+	if _alchemizing:
+		request_stop_alchemy()
 	if _channeling and not _channel_mobile:
 		_cancel_channel()
 
@@ -196,7 +200,7 @@ func _process(delta: float) -> void:
 
 func process_movement(delta: float) -> void:
 	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms \
-			or (_channeling and not _channel_mobile) or _woodcutting or _combat:
+			or (_channeling and not _channel_mobile) or _woodcutting or _combat or _alchemizing:
 		_stop_grid_movement()
 		body.velocity = Vector3.ZERO
 		body.move_and_slide()
@@ -254,7 +258,7 @@ func process_input() -> void:
 		action_input = false
 		return
 
-	if _woodcutting or _combat:
+	if _woodcutting or _combat or _alchemizing:
 		action_input = false
 		return
 
@@ -307,7 +311,7 @@ func process_animation(delta: float) -> void:
 		return
 	flipped = look_direction.x < 0.0
 	_update_hand_pivot(delta)
-	if _woodcutting or _combat:
+	if _woodcutting or _combat or _alchemizing:
 		anim = Animations.IDLE
 		return
 	anim = Animations.RUN if input_direction != Vector2.ZERO else Animations.IDLE
@@ -407,7 +411,7 @@ func _on_channel_end(payload: Dictionary) -> void:
 
 
 func request_recall() -> void:
-	if _channeling or _woodcutting or _combat or InstanceClient.current == null:
+	if _channeling or _woodcutting or _combat or _alchemizing or InstanceClient.current == null:
 		return
 	Client.request_data(&"recall.start", Callable(), {}, InstanceClient.current.name)
 
@@ -429,6 +433,24 @@ func request_stop_woodcutting() -> void:
 func _on_woodcutting_state(payload: Dictionary) -> void:
 	var active: bool = bool(payload.get("active", false))
 	_woodcutting = active
+	if active:
+		_stop_grid_movement()
+		input_direction = Vector2.ZERO
+
+
+func is_alchemizing() -> bool:
+	return _alchemizing
+
+
+func request_stop_alchemy() -> void:
+	if not _alchemizing or InstanceClient.current == null:
+		return
+	Client.request_data(&"alchemy.stop", Callable(), {}, InstanceClient.current.name)
+
+
+func _on_alchemy_state(payload: Dictionary) -> void:
+	var active: bool = bool(payload.get("active", false))
+	_alchemizing = active
 	if active:
 		_stop_grid_movement()
 		input_direction = Vector2.ZERO

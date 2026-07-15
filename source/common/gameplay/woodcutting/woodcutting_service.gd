@@ -49,6 +49,7 @@ static func start(peer_id: int, player: Player, tree: SpiritTree, instance: Serv
 		return {"ok": false, "reason": "invalid"}
 	if player.global_position.distance_to(tree.global_position) > INTERACT_RANGE:
 		return {"ok": false, "reason": "too_far"}
+	AlchemyService.stop(peer_id, "woodcutting")
 	stop(peer_id, "restart")
 	_ensure_tick_hook()
 	var session: Session = Session.new(peer_id, player, tree, instance)

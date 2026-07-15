@@ -7,4 +7,5 @@ enum State {
 	IDLE,
 	WOODCUTTING,
 	COMBAT,
+	ALCHEMY,
 }

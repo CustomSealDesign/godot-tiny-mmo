@@ -8,6 +8,7 @@ const SPIRIT_WOOD: int = 9001
 const LOW_GRADE_SPIRIT_STONE: int = 9002
 const WOLF_CORE: int = 9003
 const SPIRIT_COINS: int = 9004
+const MINOR_BLOOD_PILL: int = 9005
 
 ## item_id -> { "name": String, "stackable": bool, "icon": String, "qi_value": int }
 const ITEMS: Dictionary = {
@@ -34,6 +35,12 @@ const ITEMS: Dictionary = {
 		"stackable": true,
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
 		"qi_value": 0,
+	},
+	MINOR_BLOOD_PILL: {
+		"name": "Minor Blood Pill",
+		"stackable": false,
+		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 200,
 	},
 }
 

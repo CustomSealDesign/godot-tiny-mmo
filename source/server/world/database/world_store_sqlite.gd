@@ -37,6 +37,7 @@ func save_player(player: PlayerResource) -> void:
 	var slot_inventory_json: String = JSON.stringify(SlotInventory.to_payload(player.slot_inventory))
 	var equipment_json: String = JSON.stringify(player.equipment)
 	var skills_json: String = JSON.stringify(player.skills)
+	var osrs_skills_json: String = JSON.stringify(player.osrs_skills)
 	var mastery_json: String = JSON.stringify({
 		"masteries": player.masteries,
 		"loadout": player.ability_loadout,
@@ -66,9 +67,9 @@ func save_player(player: PlayerResource) -> void:
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, level, experience, qi_level, cultivation_realm, woodcutting_xp, available_attributes_points, "
 		+ "profile_status, profile_animation, "
-		+ "attributes_json, inventory_json, slot_inventory_json, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, "
+		+ "attributes_json, inventory_json, slot_inventory_json, equipment_json, skills_json, osrs_skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -89,6 +90,7 @@ func save_player(player: PlayerResource) -> void:
 			slot_inventory_json,
 			equipment_json,
 			skills_json,
+			osrs_skills_json,
 			mastery_json,
 			quests_json,
 			friends_json,
@@ -138,6 +140,7 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	# Everyone who plays the alpha carries the badge for it.
 	player.titles_unlocked = PackedStringArray(["Alpha tester"])
 	player.display_title = "Alpha tester"
+	player.ensure_osrs_skills()
 	# Leave defaults to PlayerResource where possible.
 	save_player(player)
 	return next_id
@@ -266,6 +269,12 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 			"xp": int(entry.get("xp", 0)),
 			"perks": perks,
 		}
+
+	var osrs_skills_raw: Dictionary = JSON.parse_string(str(row.get("osrs_skills_json", "{}"))) as Dictionary
+	player.osrs_skills = {}
+	for skill_name in osrs_skills_raw:
+		player.osrs_skills[StringName(skill_name)] = int(osrs_skills_raw[skill_name])
+	player.ensure_osrs_skills()
 
 	# Outfitting merge (2026-07-02): tailoring + leatherworking became ONE job.
 	# Old saves carry the retired keys — fold them into outfitting (keep the

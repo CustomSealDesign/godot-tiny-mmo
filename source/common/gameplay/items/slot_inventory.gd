@@ -104,8 +104,6 @@ static func add_item(slots: Array, item_id: int, amount: int = 1) -> Dictionary:
 	return {"ok": true, "reason": "", "added": added}
 
 
-## Remove one item from [param slot_index]. Clears the slot when quantity reaches 0.
-## Returns { ok, reason, item_id, quantity_remaining }.
 static func remove_one_from_slot(slots: Array, slot_index: int) -> Dictionary:
 	if slot_index < 0 or slot_index >= slots.size():
 		return {"ok": false, "reason": "invalid_slot", "item_id": 0, "quantity_remaining": 0}
@@ -128,6 +126,45 @@ static func remove_one_from_slot(slots: Array, slot_index: int) -> Dictionary:
 		"item_id": item_id,
 		"quantity_remaining": maxi(remaining, 0),
 	}
+
+
+static func count_item(slots: Array, item_id: int) -> int:
+	if item_id <= 0:
+		return 0
+	var total: int = 0
+	for slot_v: Variant in slots:
+		var slot: Dictionary = slot_v as Dictionary
+		if int(slot.get("item_id", 0)) == item_id:
+			total += int(slot.get("quantity", 0))
+	return total
+
+
+static func has_amount(slots: Array, item_id: int, amount: int) -> bool:
+	return count_item(slots, item_id) >= amount
+
+
+## Remove [param amount] of [param item_id] across slots. Returns false if insufficient.
+static func remove_amount_by_id(slots: Array, item_id: int, amount: int) -> bool:
+	if item_id <= 0 or amount <= 0:
+		return false
+	if count_item(slots, item_id) < amount:
+		return false
+	var remaining: int = amount
+	for i: int in slots.size():
+		if remaining <= 0:
+			break
+		var slot: Dictionary = slots[i] as Dictionary
+		if int(slot.get("item_id", 0)) != item_id:
+			continue
+		var have: int = int(slot.get("quantity", 0))
+		var to_remove: int = mini(have, remaining)
+		var left: int = have - to_remove
+		if left <= 0:
+			slots[i] = _empty_slot()
+		else:
+			slots[i] = {"item_id": item_id, "quantity": left}
+		remaining -= to_remove
+	return remaining <= 0
 
 
 static func to_payload(slots: Array) -> Array:
