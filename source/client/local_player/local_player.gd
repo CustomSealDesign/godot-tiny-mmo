@@ -1,4 +1,4 @@
-class_name LocalPlayer
+class_name LocalPlayer2D
 extends Player
 
 ## Toast tint for the SAFE <-> PvP zone-crossing notice — red warns of danger,
