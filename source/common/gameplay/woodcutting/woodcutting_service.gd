@@ -7,9 +7,7 @@ const TICKS_PER_ROLL: int = 3
 const INTERACT_RANGE: float = 90.0
 const MOVE_TOLERANCE: float = 2.0
 const XP_PER_SUCCESS: int = 10
-const SPIRIT_GATHERING_XP: int = 25
 const QI_PER_SUCCESS: int = 5
-const SPIRIT_WOOD_ITEM_ID: int = ItemDatabase.SPIRIT_WOOD
 
 class Session:
 	var peer_id: int
@@ -50,6 +48,22 @@ static func start(peer_id: int, player: Player, tree: SpiritTree, instance: Serv
 		return {"ok": false, "reason": "invalid"}
 	if player.global_position.distance_to(tree.global_position) > INTERACT_RANGE:
 		return {"ok": false, "reason": "too_far"}
+
+	var resource: PlayerResource = player.player_resource
+	if resource == null:
+		return {"ok": false, "reason": "invalid"}
+
+	resource.ensure_osrs_skills()
+	var gathering_level: int = SkillManager.get_level_from_xp(
+		resource.get_osrs_skill_xp(SkillManager.SPIRIT_GATHERING)
+	)
+	if gathering_level < tree.required_level:
+		_push_system_message(
+			peer_id,
+			"You need a Spirit Gathering level of %d to chop this." % tree.required_level
+		)
+		return {"ok": false, "reason": "level", "required_level": tree.required_level}
+
 	AlchemyService.stop(peer_id, "woodcutting")
 	stop(peer_id, "restart")
 	_ensure_tick_hook()
@@ -118,16 +132,18 @@ static func _tick_session(peer_id: int) -> void:
 	if roll > success_chance(resource.woodcutting_xp):
 		return
 
-	var add_result: Dictionary = SlotInventory.add_item(resource.slot_inventory, SPIRIT_WOOD_ITEM_ID, 1)
+	var item_id: int = session.tree.gather_item_id
+	var add_result: Dictionary = SlotInventory.add_item(resource.slot_inventory, item_id, 1)
 	if not bool(add_result.get("ok", false)):
 		_push_error(peer_id, "Your inventory is full")
 		stop(peer_id, "inventory_full")
 		return
 
+	var gather_xp: int = maxi(1, session.tree.gather_xp)
 	var gathering_xp: Dictionary = OsrsSkillService.add_xp(
 		resource,
 		SkillManager.SPIRIT_GATHERING,
-		SPIRIT_GATHERING_XP
+		gather_xp
 	)
 	resource.woodcutting_xp += XP_PER_SUCCESS
 	CultivationService.grant_qi(resource, QI_PER_SUCCESS)
@@ -144,8 +160,8 @@ static func _tick_session(peer_id: int) -> void:
 		"xp_gained": XP_PER_SUCCESS,
 		"qi_gained": QI_PER_SUCCESS,
 		"tree": session.tree.name,
-		"item_id": SPIRIT_WOOD_ITEM_ID,
-		"item_name": ItemDatabase.get_name(SPIRIT_WOOD_ITEM_ID),
+		"item_id": item_id,
+		"item_name": ItemDatabase.get_name(item_id),
 		"item_quantity": 1,
 		"spirit_gathering_xp_gained": int(gathering_xp.get("xp_gained", 0)),
 		"spirit_gathering_level": int(gathering_xp.get("level", 1)),
@@ -188,3 +204,9 @@ static func _push_error(peer_id: int, message: String) -> void:
 	if WorldServer.curr == null or peer_id <= 0:
 		return
 	WorldServer.curr.data_push.rpc_id(peer_id, &"woodcutting.error", {"message": message})
+
+
+static func _push_system_message(peer_id: int, message: String) -> void:
+	if WorldServer.curr == null or peer_id <= 0:
+		return
+	WorldServer.curr.data_push.rpc_id(peer_id, &"system.message", {"message": message})
