@@ -34,6 +34,8 @@ Client="*res://source/client/autoload/client.tscn"
 Toaster="*res://source/client/autoload/toaster.gd"
 Transition="*res://source/client/autoload/transition.gd"
 TickManager="*res://source/common/gameplay/time/tick_manager.gd"
+SkillManager="*res://source/common/gameplay/skills/skill_manager.gd"
+RecipeDatabase="*res://source/common/gameplay/crafting/recipe_database.gd"
 
 [debug]
 

@@ -65,6 +65,10 @@ const HEALTH_PER_LEVEL: float = 5.0
 ## Generalizes to any gathering/crafting profession; persisted as JSON.
 @export var skills: Dictionary
 
+## OSRS-style skills: skill_name -> total XP (level derived via SkillManager).
+## Starting skills: Spirit_Gathering, Alchemy, Combat. Persisted as osrs_skills_json.
+@export var osrs_skills: Dictionary = {}
+
 ## Weapon mastery: category (&"wand", ...) -> {"level": int, "xp": int, "spent": Dictionary}.
 ## "spent" holds the bought mastery-tree node ids (node_id (String) -> true).
 ## Persisted as JSON (mastery_json column) together with ability_loadout.
@@ -191,6 +195,17 @@ var character_flags: Dictionary
 
 func has_character_flag(flag: StringName) -> bool:
 	return character_flags.get(flag, false)
+
+
+func ensure_osrs_skills() -> void:
+	for skill_name: StringName in SkillManager.STARTING_SKILLS:
+		if not osrs_skills.has(skill_name):
+			osrs_skills[skill_name] = 0
+
+
+func get_osrs_skill_xp(skill_name: StringName) -> int:
+	ensure_osrs_skills()
+	return int(osrs_skills.get(skill_name, 0))
 
 
 func set_character_flag(flag: StringName) -> void:

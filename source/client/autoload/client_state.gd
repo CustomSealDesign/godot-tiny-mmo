@@ -38,6 +38,9 @@ var player_level: int = 1
 var qi_level: int = 0
 var cultivation_realm: String = "Mortal"
 var woodcutting_xp: int = 0
+## OSRS-style skills mirrored from skills.update / skills.osrs.get.
+var osrs_skills: Dictionary = {}
+signal skills_changed
 signal cultivation_changed
 ## OSRS-style 28-slot bag mirrored from inventory.update / inventory.slots.get.
 var slot_inventory: Array = []
@@ -117,6 +120,9 @@ func _ready() -> void:
 		active_guild_id = payload.get("active_guild_id", 0))
 	Client.subscribe(&"cultivation.update", apply_cultivation)
 	Client.subscribe(&"inventory.update", apply_inventory)
+	Client.subscribe(&"skills.update", apply_skills)
+	Client.subscribe(&"alchemy.result", _on_alchemy_result)
+	Client.subscribe(&"alchemy.error", _on_alchemy_error)
 	Client.subscribe(&"cultivation.breakthrough", _on_cultivation_breakthrough)
 	Client.subscribe(&"woodcutting.result", _on_woodcutting_result)
 	Client.subscribe(&"woodcutting.error", _on_woodcutting_error)
@@ -153,6 +159,29 @@ func apply_inventory(data: Dictionary) -> void:
 	if slots_v is Array:
 		slot_inventory = slots_v
 		inventory_changed.emit()
+
+
+func apply_skills(data: Dictionary) -> void:
+	var skills_v: Variant = data.get("skills", {})
+	if skills_v is Dictionary:
+		osrs_skills = skills_v
+		skills_changed.emit()
+
+
+func _on_alchemy_result(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		return
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("+%d %s XP" % [int(data.get("xp_gained", 0)), str(data.get("skill", "Alchemy"))])
+	if bool(data.get("leveled_up", false)):
+		lines.append("%s Level %d!" % [str(data.get("skill", "Alchemy")), int(data.get("level", 1))])
+	Toaster.toast_group("Alchemy", lines)
+
+
+func _on_alchemy_error(data: Dictionary) -> void:
+	var message: String = str(data.get("message", ""))
+	if not message.is_empty():
+		Toaster.toast(message)
 
 
 func _on_cultivation_breakthrough(data: Dictionary) -> void:
