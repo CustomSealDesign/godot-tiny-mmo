@@ -1,8 +1,8 @@
 class_name SpiritTree
 extends Node2D
 ## A 3D spirit tree the local player can click to pathfind toward and woodcut.
-## Server registers each instance on its Map by node name; the client handles
-## pursuit + start_woodcutting once within [constant INTERACT_RANGE].
+## Server registers each instance on its Map by node name; the client paths to the
+## nearest empty adjacent tile and fires start_woodcutting only after arrival.
 
 
 const INTERACT_RANGE: float = WoodcuttingService.INTERACT_RANGE
@@ -12,7 +12,6 @@ const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/com
 @export var floor_probe_height: float = 32.0
 @export var floor_probe_depth: float = 64.0
 
-var _pursuing: bool = false
 var _interactable_hovered: bool = false
 
 @onready var _visual_root: Node3D = $Visual3D
@@ -32,29 +31,28 @@ func _ready() -> void:
 	_click_area.tree_exiting.connect(_set_interactable_hover.bind(false))
 	_spawn_marker()
 	_sync_visual_from_plane()
-	set_process(true)
+	if ClientState.local_player != null:
+		_mark_tile_solid()
+	else:
+		ClientState.local_player_ready.connect(_on_local_player_ready, CONNECT_ONE_SHOT)
 
 
-func _process(_delta: float) -> void:
-	if not _pursuing:
-		return
+func _on_local_player_ready(_lp: LocalPlayer) -> void:
+	_mark_tile_solid()
+
+
+func _mark_tile_solid() -> void:
 	var lp: LocalPlayer = ClientState.local_player
-	if lp == null or not is_instance_valid(lp):
-		_pursuing = false
+	if lp == null or lp.pathfinder == null:
 		return
-	if ClientState.menu_open or lp._dead:
-		_pursuing = false
-		return
-	if _player_in_range(lp):
-		_pursuing = false
-		_request_start()
+	lp.pathfinder.mark_solid(GridMovement.plane_to_grid(global_position))
 
 
 func _on_clicked() -> void:
 	if ClientState.menu_open:
 		return
 	var lp: LocalPlayer = ClientState.local_player
-	if lp == null or not is_instance_valid(lp) or lp._dead:
+	if lp == null or not is_instance_valid(lp) or lp._dead or lp.pathfinder == null:
 		return
 	if lp.is_woodcutting():
 		lp.request_stop_woodcutting()
@@ -62,10 +60,26 @@ func _on_clicked() -> void:
 	if _player_in_range(lp):
 		_request_start()
 		return
-	_pursuing = true
-	var target: Vector3 = _visual_root.global_position
-	lp.nav_agent.target_position = target
-	lp._has_nav_target = true
+
+	var target_plane: Vector2 = lp.pathfinder.find_nearest_available_tile(
+		global_position,
+		lp.global_position
+	)
+	if target_plane == global_position:
+		return
+
+	var path: PackedVector2Array = lp.pathfinder.find_path(lp.global_position, target_plane)
+	if path.is_empty():
+		return
+
+	if lp.camera_3d != null and lp.camera_3d.has_method(&"_update_tile_indicator"):
+		lp.camera_3d._update_tile_indicator(target_plane)
+	lp.move_to_plane(target_plane, self)
+
+
+func on_player_arrived() -> void:
+	if _player_in_range(ClientState.local_player):
+		_request_start()
 
 
 func _request_start() -> void:
@@ -80,6 +94,8 @@ func _request_start() -> void:
 
 
 func _player_in_range(lp: LocalPlayer) -> bool:
+	if lp == null:
+		return false
 	return global_position.distance_to(lp.global_position) <= INTERACT_RANGE
 
 

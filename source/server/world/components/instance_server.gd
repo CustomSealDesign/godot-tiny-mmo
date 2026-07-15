@@ -138,7 +138,7 @@ func _on_player_entered_interaction_area(player: Player, interaction_area: Inter
 		if teleporter.target == null:
 			return
 		player.mark_just_teleported()
-		var dest: Vector2 = teleporter.target.global_position
+		var dest: Vector2 = GridMovement.snap_plane(teleporter.target.global_position)
 		player.state_synchronizer.set_by_path(^":position", dest)
 		# The teleported client OWNS its LocalPlayer position, so a state delta alone won't move it
 		# (it overwrites with its own input next frame). Push the explicit player.teleport that
@@ -195,6 +195,7 @@ func spawn_player(peer_id: int) -> void:
 	
 	if spawn_position == Vector2.ZERO:
 		spawn_position = instance_map.get_spawn_position(0)
+	spawn_position = GridMovement.snap_plane(spawn_position)
 
 	var syn: StateSynchronizer = player.state_synchronizer
 	syn.set_by_path(^":position", spawn_position)

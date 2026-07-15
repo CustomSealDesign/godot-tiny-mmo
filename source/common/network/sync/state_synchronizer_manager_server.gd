@@ -303,22 +303,38 @@ func on_client_delta(bytes: PackedByteArray) -> void:
 	if eid != sender:
 		return
 
+	var syn: StateSynchronizer = entities.get(eid, null)
+	if syn == null:
+		return
+
 	# Whitelist: a client may only write its own movement/animation fields. Everything
 	# else (health, stats, zone_flags, equipment slots, ...) is server-authoritative, so
 	# drop any non-owned field a crafted client tries to push.
 	var allowed: Array = []
+	var position_fid: int = PathRegistry.id_of(":position")
 	for pair: Array in pairs:
-		if pair.size() >= 2 and _is_client_owned(int(pair[0])):
-			allowed.append(pair)
+		if pair.size() < 2 or not _is_client_owned(int(pair[0])):
+			continue
+		var fid: int = int(pair[0])
+		var value: Variant = pair[1]
+		if fid == position_fid and value is Vector2:
+			var has_previous: bool = syn.last_applied.has(position_fid)
+			if has_previous:
+				var previous_plane: Vector2 = _read_entity_plane(eid, syn)
+				var validation: Dictionary = GridMovementValidator.validate_step(previous_plane, value)
+				if not bool(validation.get("ok", false)):
+					continue
+				value = validation.get("position", previous_plane)
+			else:
+				value = GridMovement.snap_plane(value)
+		allowed.append([fid, value])
 	if allowed.is_empty():
 		return
 
 	# Apply then re-mark to echo back next tick (prediction-friendly).
-	var syn: StateSynchronizer = entities.get(eid, null)
-	if syn != null:
-		syn.apply_delta(allowed)
-		syn.mark_many_by_id(allowed, false)
-		_track_client_pairs(eid, allowed)
+	syn.apply_delta(allowed)
+	syn.mark_many_by_id(allowed, false)
+	_track_client_pairs(eid, allowed)
 
 
 
@@ -384,12 +400,14 @@ var _eid_to_cell: Dictionary[int, Vector2i]
 
 
 func _eid_position(eid: int) -> Vector2:
-	var syn: StateSynchronizer = entities.get(eid, null)
+	return _read_entity_plane(eid, entities.get(eid, null))
+
+
+func _read_entity_plane(eid: int, syn: StateSynchronizer) -> Vector2:
 	if syn == null:
 		return Vector2.ZERO
-	# We rely on your PathRegistry id for ":position"
 	var fid: int = PathRegistry.id_of(":position")
-	var state: Variant= syn.last_applied  # internal, but fine inside manager
+	var state: Variant = syn.last_applied
 	if state.has(fid):
 		return Vector2(state[fid])
 	return Vector2.ZERO

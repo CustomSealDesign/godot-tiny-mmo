@@ -338,6 +338,7 @@ func teleport_peer_to(peer_id: int, dest_instance: ServerInstance, dest_position
 
 	if current_inst == dest_instance:
 		player.mark_just_teleported()
+		dest_position = GridMovement.snap_plane(dest_position)
 		player.state_synchronizer.set_by_path(^":position", dest_position)
 		world_server.data_push.rpc_id(peer_id, &"player.teleport", {"position": dest_position})
 		return true
