@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+  <defs>
+    <linearGradient id="parchG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe0b6"/>
+      <stop offset="0.55" stop-color="#e3d0a0"/>
+      <stop offset="1" stop-color="#d5bd88"/>
+    </linearGradient>
+    <linearGradient id="woodG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#221710"/>
+      <stop offset="0.45" stop-color="#5c4129"/>
+      <stop offset="1" stop-color="#241811"/>
+    </linearGradient>
+    <linearGradient id="goldCapG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6c076"/>
+      <stop offset="1" stop-color="#8a6530"/>
+    </linearGradient>
+    <linearGradient id="curlL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000000" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="curlR" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#000000" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- weathered parchment body -->
+  <path d="M30 26 C150 20 270 29 400 24 C530 19 650 28 770 24 L770 176 C650 182 530 172 400 178 C270 183 150 174 30 178 Z" fill="url(#parchG)" stroke="#8a6f42" stroke-opacity="0.5" stroke-width="1.5"/>
+  <rect x="31" y="28" width="60" height="145" fill="url(#curlL)"/>
+  <rect x="709" y="28" width="60" height="145" fill="url(#curlR)"/>
+  <ellipse cx="215" cy="142" rx="46" ry="16" fill="#a5854f" fill-opacity="0.10"/>
+  <ellipse cx="588" cy="58" rx="38" ry="13" fill="#a5854f" fill-opacity="0.08"/>
+  <ellipse cx="402" cy="158" rx="58" ry="10" fill="#8f7442" fill-opacity="0.07"/>
+  <path d="M74 66 Q400 59 726 67" fill="none" stroke="#b1955e" stroke-opacity="0.28" stroke-width="1"/>
+  <path d="M74 134 Q400 141 726 133" fill="none" stroke="#b1955e" stroke-opacity="0.22" stroke-width="1"/>
+  <rect x="60" y="40" width="680" height="120" rx="2" fill="none" stroke="#6d5427" stroke-opacity="0.65" stroke-width="1.6"/>
+  <rect x="66" y="46" width="668" height="108" rx="2" fill="none" stroke="#3f8a68" stroke-opacity="0.28" stroke-width="1"/>
+  <path d="M84 60 q3 -8 11 -6 q4 -6 10 -1 q7 -2 7 5" fill="none" stroke="#8a6a38" stroke-opacity="0.5" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M716 140 q-3 8 -11 6 q-4 6 -10 1 q-7 2 -7 -5" fill="none" stroke="#8a6a38" stroke-opacity="0.5" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- left roller -->
+  <circle cx="28" cy="12" r="7" fill="#3a2a1c" stroke="#c39a52" stroke-width="1.5"/>
+  <circle cx="28" cy="188" r="7" fill="#3a2a1c" stroke="#c39a52" stroke-width="1.5"/>
+  <rect x="16" y="14" width="24" height="172" rx="11" fill="url(#woodG)" stroke="#120d08" stroke-width="1"/>
+  <rect x="14" y="21" width="28" height="7" rx="3.5" fill="url(#goldCapG)"/>
+  <rect x="14" y="172" width="28" height="7" rx="3.5" fill="url(#goldCapG)"/>
+  <!-- right roller -->
+  <circle cx="772" cy="12" r="7" fill="#3a2a1c" stroke="#c39a52" stroke-width="1.5"/>
+  <circle cx="772" cy="188" r="7" fill="#3a2a1c" stroke="#c39a52" stroke-width="1.5"/>
+  <rect x="760" y="14" width="24" height="172" rx="11" fill="url(#woodG)" stroke="#120d08" stroke-width="1"/>
+  <rect x="758" y="21" width="28" height="7" rx="3.5" fill="url(#goldCapG)"/>
+  <rect x="758" y="172" width="28" height="7" rx="3.5" fill="url(#goldCapG)"/>
+</svg>
