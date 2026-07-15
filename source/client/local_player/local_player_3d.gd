@@ -30,6 +30,7 @@ var _equip_bar: ChannelVisual = null
 var _trauma: float = 0.0
 var _net_send_accum: float = 0.0
 var _has_nav_target: bool = false
+var _woodcutting: bool = false
 
 var fid_position: int
 var fid_flipped: int
@@ -85,6 +86,7 @@ func _ready() -> void:
 	Client.subscribe(&"channel.end", _on_channel_end)
 	Client.subscribe(&"equip.cast", _on_equip_cast)
 	Client.subscribe(&"equip.done", _on_equip_done)
+	Client.subscribe(&"woodcutting.state", _on_woodcutting_state)
 	Client.subscribe(&"group.roster", _on_group_roster)
 	Client.subscribe(&"dungeon.cleared", func(payload: Dictionary) -> void:
 		ClientState.open_menu_requested.emit(&"dungeon_recap", payload))
@@ -128,6 +130,8 @@ func _process(delta: float) -> void:
 func _on_move_target_selected(world_position: Vector3) -> void:
 	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
 		return
+	if _woodcutting:
+		request_stop_woodcutting()
 	if _channeling and not _channel_mobile:
 		_cancel_channel()
 	nav_agent.target_position = world_position
@@ -140,7 +144,7 @@ func _on_look_plane_changed(plane_direction: Vector2) -> void:
 
 func process_movement() -> void:
 	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms \
-			or (_channeling and not _channel_mobile):
+			or (_channeling and not _channel_mobile) or _woodcutting:
 		body.velocity = Vector3.ZERO
 		body.move_and_slide()
 		_publish_plane_from_body()
@@ -198,6 +202,10 @@ func process_input() -> void:
 		action_input = false
 		return
 
+	if _woodcutting:
+		action_input = false
+		return
+
 	action_input = Input.is_action_pressed(&"player_shoot") and not click_input.ui_blocks_combat()
 
 	if is_equip_drawing():
@@ -237,6 +245,9 @@ func process_animation(delta: float) -> void:
 		return
 	flipped = look_direction.x < 0.0
 	_update_hand_pivot(delta)
+	if _woodcutting:
+		anim = Animations.IDLE
+		return
 	anim = Animations.RUN if input_direction != Vector2.ZERO else Animations.IDLE
 
 
@@ -337,9 +348,28 @@ func _on_channel_end(payload: Dictionary) -> void:
 
 
 func request_recall() -> void:
-	if _channeling or InstanceClient.current == null:
+	if _channeling or _woodcutting or InstanceClient.current == null:
 		return
 	Client.request_data(&"recall.start", Callable(), {}, InstanceClient.current.name)
+
+
+func is_woodcutting() -> bool:
+	return _woodcutting
+
+
+func request_stop_woodcutting() -> void:
+	if not _woodcutting or InstanceClient.current == null:
+		return
+	Client.request_data(&"woodcutting.stop", Callable(), {}, InstanceClient.current.name)
+
+
+func _on_woodcutting_state(payload: Dictionary) -> void:
+	var active: bool = bool(payload.get("active", false))
+	_woodcutting = active
+	if active:
+		_has_nav_target = false
+		nav_agent.target_position = body.global_position
+		input_direction = Vector2.ZERO
 
 
 func _cancel_channel() -> void:

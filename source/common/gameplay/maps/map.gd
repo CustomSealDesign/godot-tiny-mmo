@@ -86,6 +86,8 @@ var trade_tables: Dictionary[int, TradeTable]
 var territory_flags: Dictionary[int, TerritoryFlag]
 ## master_id -> DuelMaster NPC. The server queues sparring through these.
 var duel_masters: Dictionary[int, DuelMaster]
+## node name -> SpiritTree. The server resolves woodcutting targets by name.
+var spirit_trees: Dictionary[StringName, SpiritTree]
 
 
 ## Walk up from [param node] to the Map that owns it, or null. Map components
