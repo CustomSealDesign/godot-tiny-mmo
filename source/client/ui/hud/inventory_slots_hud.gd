@@ -100,14 +100,61 @@ func _build_ui() -> void:
 	_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(_grid)
 
-	for _i: int in SlotInventory.SLOT_COUNT:
+	for slot_index: int in SlotInventory.SLOT_COUNT:
 		var button: Button = Button.new()
 		button.custom_minimum_size = SLOT_SIZE
 		button.clip_contents = true
 		button.focus_mode = Control.FOCUS_NONE
 		button.mouse_filter = Control.MOUSE_FILTER_PASS
+		button.gui_input.connect(_on_slot_gui_input.bind(slot_index))
 		_grid.add_child(button)
 		_slot_buttons.append(button)
+
+
+func _on_slot_gui_input(event: InputEvent, slot_index: int) -> void:
+	if not (event is InputEventMouseButton):
+		return
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if not mouse_event.pressed:
+		return
+	var is_consume_click: bool = (
+		mouse_event.button_index == MOUSE_BUTTON_RIGHT
+		or mouse_event.double_click
+	)
+	if not is_consume_click:
+		return
+	_try_consume_slot(slot_index)
+
+
+func _try_consume_slot(slot_index: int) -> void:
+	if InstanceClient.current == null:
+		return
+	if slot_index < 0 or slot_index >= ClientState.slot_inventory.size():
+		return
+	var slot: Dictionary = ClientState.slot_inventory[slot_index] as Dictionary
+	var item_id: int = int(slot.get("item_id", 0))
+	var quantity: int = int(slot.get("quantity", 0))
+	if item_id <= 0 or quantity <= 0:
+		return
+	if not ItemDatabase.is_consumable(item_id):
+		return
+	Client.request_data(
+		&"consume_item",
+		_on_consume_response,
+		{"slot_index": slot_index},
+		InstanceClient.current.name,
+	)
+
+
+func _on_consume_response(payload: Variant) -> void:
+	if not (payload is Dictionary):
+		return
+	var data: Dictionary = payload as Dictionary
+	if not bool(data.get("ok", false)):
+		return
+	if data.has("slots"):
+		ClientState.apply_inventory({"slots": data.get("slots", [])})
+	ClientState.apply_cultivation(data)
 
 
 func _clear_slot_button(button: Button) -> void:

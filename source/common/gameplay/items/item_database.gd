@@ -9,27 +9,31 @@ const LOW_GRADE_SPIRIT_STONE: int = 9002
 const WOLF_CORE: int = 9003
 const SPIRIT_COINS: int = 9004
 
-## item_id -> { "name": String, "stackable": bool, "icon": String }
+## item_id -> { "name": String, "stackable": bool, "icon": String, "qi_value": int }
 const ITEMS: Dictionary = {
 	SPIRIT_WOOD: {
 		"name": "Spirit Wood",
 		"stackable": false,
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_10.png",
+		"qi_value": 5,
 	},
 	LOW_GRADE_SPIRIT_STONE: {
 		"name": "Low-Grade Spirit Stone",
 		"stackable": true,
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
+		"qi_value": 0,
 	},
 	WOLF_CORE: {
 		"name": "Wolf Core",
 		"stackable": false,
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+		"qi_value": 50,
 	},
 	SPIRIT_COINS: {
 		"name": "Spirit Coins",
 		"stackable": true,
 		"icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
+		"qi_value": 0,
 	},
 }
 
@@ -44,6 +48,14 @@ static func get_name(item_id: int) -> String:
 
 static func is_stackable(item_id: int) -> bool:
 	return bool(ITEMS.get(item_id, {}).get("stackable", false))
+
+
+static func get_qi_value(item_id: int) -> int:
+	return int(ITEMS.get(item_id, {}).get("qi_value", 0))
+
+
+static func is_consumable(item_id: int) -> bool:
+	return get_qi_value(item_id) > 0
 
 
 static func get_icon_path(item_id: int) -> String:
