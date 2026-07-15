@@ -18,6 +18,11 @@ const BAR_COLOR_ALLY: Color = Color(0.30, 0.62, 1.0)
 const BAR_COLOR_NEUTRAL: Color = Color(0.82, 0.82, 0.86)
 const BAR_COLOR_HOSTILE: Color = Color(0.86, 0.33, 0.28)
 
+const WALK_ANIM_FPS: float = 5.0
+const IDLE_SPRITE_FRAME: int = 0
+const WALK_SPRITE_FRAME_FIRST: int = 1
+const WALK_SPRITE_FRAME_LAST: int = 5
+
 static var local_viewer_guild_id: int = 0
 static var spar_ally_peers: Array = []
 static var spar_opponent_peers: Array = []
@@ -52,6 +57,8 @@ var _last_health_seen: float = -1.0
 var _hit_flash_tween: Tween
 var _bar_value_tween: Tween
 var _bar_hide_tween: Tween
+var _walk_anim_time: float = 0.0
+var _walk_sprite_frame: int = WALK_SPRITE_FRAME_FIRST
 
 @export var floor_collision_mask: int = 1
 @export var floor_probe_height: float = 32.0
@@ -78,10 +85,17 @@ func _ready() -> void:
 	if health_bar_auto_hide:
 		progress_bar.hide()
 	_sync_body_from_plane()
+	_apply_sprite_anim_state()
 
 
 func _physics_process(_delta: float) -> void:
 	_sync_body_from_plane()
+
+
+func _process(delta: float) -> void:
+	if multiplayer.is_server():
+		return
+	_advance_sprite_animation(delta)
 
 
 func wants_net_smoothing() -> bool:
@@ -200,7 +214,37 @@ func _set_skin_id(id: int) -> void:
 
 
 func _set_anim(new_anim: Animations) -> void:
+	if anim == new_anim:
+		return
 	anim = new_anim
+	_apply_sprite_anim_state()
+
+
+func _apply_sprite_anim_state() -> void:
+	if sprite_billboard == null:
+		return
+	match anim:
+		Animations.IDLE, Animations.DEATH:
+			_walk_anim_time = 0.0
+			_walk_sprite_frame = WALK_SPRITE_FRAME_FIRST
+			sprite_billboard.frame = IDLE_SPRITE_FRAME
+		Animations.RUN:
+			_walk_anim_time = 0.0
+			_walk_sprite_frame = WALK_SPRITE_FRAME_FIRST
+			sprite_billboard.frame = WALK_SPRITE_FRAME_FIRST
+
+
+func _advance_sprite_animation(delta: float) -> void:
+	if sprite_billboard == null or anim != Animations.RUN:
+		return
+	_walk_anim_time += delta
+	var frame_duration: float = 1.0 / WALK_ANIM_FPS
+	while _walk_anim_time >= frame_duration:
+		_walk_anim_time -= frame_duration
+		_walk_sprite_frame += 1
+		if _walk_sprite_frame > WALK_SPRITE_FRAME_LAST:
+			_walk_sprite_frame = WALK_SPRITE_FRAME_FIRST
+	sprite_billboard.frame = _walk_sprite_frame
 
 
 func _set_flip(new_flip: bool) -> void:
