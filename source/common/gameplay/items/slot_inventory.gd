@@ -104,6 +104,32 @@ static func add_item(slots: Array, item_id: int, amount: int = 1) -> Dictionary:
 	return {"ok": true, "reason": "", "added": added}
 
 
+## Remove one item from [param slot_index]. Clears the slot when quantity reaches 0.
+## Returns { ok, reason, item_id, quantity_remaining }.
+static func remove_one_from_slot(slots: Array, slot_index: int) -> Dictionary:
+	if slot_index < 0 or slot_index >= slots.size():
+		return {"ok": false, "reason": "invalid_slot", "item_id": 0, "quantity_remaining": 0}
+
+	var slot: Dictionary = slots[slot_index] as Dictionary
+	var item_id: int = int(slot.get("item_id", 0))
+	var quantity: int = int(slot.get("quantity", 0))
+	if item_id <= 0 or quantity <= 0:
+		return {"ok": false, "reason": "empty_slot", "item_id": 0, "quantity_remaining": 0}
+
+	var remaining: int = quantity - 1
+	if remaining <= 0:
+		slots[slot_index] = _empty_slot()
+	else:
+		slots[slot_index] = {"item_id": item_id, "quantity": remaining}
+
+	return {
+		"ok": true,
+		"reason": "",
+		"item_id": item_id,
+		"quantity_remaining": maxi(remaining, 0),
+	}
+
+
 static func to_payload(slots: Array) -> Array:
 	var out: Array = []
 	for slot_v: Variant in slots:
