@@ -1,22 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://denemyspiritwolf"]
+[gd_scene load_steps=6 format=3 uid="uid://denemyspiritwolf"]
 
 [ext_resource type="Script" path="res://source/common/gameplay/characters/enemy/enemy.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/clickable_area.tscn" id="2_click"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_body"]
-size = Vector3(1.1, 0.85, 1.6)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
-albedo_color = Color(0.55, 0.58, 0.68, 1)
-
-[sub_resource type="SphereMesh" id="SphereMesh_head"]
-radius = 0.35
-height = 0.7
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_head"]
-albedo_color = Color(0.72, 0.74, 0.82, 1)
-emission_enabled = true
-emission = Color(0.18, 0.22, 0.35, 1)
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/spirit_wolf.png" id="3_sprite"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_click"]
 size = Vector2(72, 72)
@@ -35,15 +21,13 @@ loot_quantity = 1
 
 [node name="Visual3D" type="Node3D" parent="."]
 
-[node name="Body" type="MeshInstance3D" parent="Visual3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-mesh = SubResource("BoxMesh_body")
-surface_material_override/0 = SubResource("StandardMaterial3D_body")
-
-[node name="Head" type="MeshInstance3D" parent="Visual3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0.55)
-mesh = SubResource("SphereMesh_head")
-surface_material_override/0 = SubResource("StandardMaterial3D_head")
+[node name="Sprite3D" type="Sprite3D" parent="Visual3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
+billboard = 2
+texture = ExtResource("3_sprite")
+hframes = 3
+vframes = 2
+pixel_size = 0.0025
 
 [node name="ClickArea" parent="." instance=ExtResource("2_click")]
 

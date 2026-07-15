@@ -12,6 +12,13 @@ const SLOT_LABELS: Dictionary = {
 
 const SLOT_SIZE: Vector2 = Vector2(56, 56)
 
+const SLOT_EMPTY_TEXTURES: Dictionary = {
+	"head": preload("res://assets/ui/menus/equip_head.svg"),
+	"chest": preload("res://assets/ui/menus/equip_chest.svg"),
+	"legs": preload("res://assets/ui/menus/equip_legs.svg"),
+	"weapon": preload("res://assets/ui/menus/equip_weapon.svg"),
+}
+
 @onready var _slot_grid: GridContainer = %EquipmentSlotGrid
 
 
@@ -69,6 +76,7 @@ func _build_slots() -> void:
 		button.clip_contents = true
 		button.focus_mode = Control.FOCUS_NONE
 		button.name = slot_key
+		_apply_empty_slot_style(button, slot_key)
 		button.gui_input.connect(_on_slot_gui_input.bind(slot_key))
 		column.add_child(button)
 
@@ -129,3 +137,13 @@ func _on_unequip_response(payload: Variant) -> void:
 func _clear_slot_button(button: Button) -> void:
 	PixelIcon.set_art(button, null)
 	button.tooltip_text = ""
+
+
+func _apply_empty_slot_style(button: Button, slot_key: String) -> void:
+	var texture: Texture2D = SLOT_EMPTY_TEXTURES.get(slot_key, null) as Texture2D
+	if texture == null:
+		return
+	var style: StyleBoxTexture = StyleBoxTexture.new()
+	style.texture = texture
+	for state: StringName in [&"normal", &"hover", &"pressed", &"focus", &"disabled"]:
+		button.add_theme_stylebox_override(state, style)

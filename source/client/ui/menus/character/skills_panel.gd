@@ -16,6 +16,20 @@ const SKILL_LABELS: Dictionary = {
 	"Hitpoints": "Hitpoints",
 }
 
+const SKILL_ICONS: Dictionary = {
+	"Spirit_Gathering": preload("res://assets/ui/skills/skill_spirit_gathering.svg"),
+	"Mining": preload("res://assets/ui/skills/skill_mining.svg"),
+	"Forging": preload("res://assets/ui/skills/skill_forging.svg"),
+	"Alchemy": preload("res://assets/ui/skills/skill_alchemy.svg"),
+	"Attack": preload("res://assets/ui/skills/skill_attack.svg"),
+	"Strength": preload("res://assets/ui/skills/skill_strength.svg"),
+	"Defense": preload("res://assets/ui/skills/skill_defense.svg"),
+	"Hitpoints": preload("res://assets/ui/skills/skill_hitpoints.svg"),
+	"Combat": preload("res://assets/ui/skills/skill_attack.svg"),
+}
+
+const SKILL_ICON_SIZE: Vector2 = Vector2(28, 28)
+
 @onready var _skill_list: VBoxContainer = %OsrsSkillList
 
 
@@ -76,6 +90,16 @@ func _refresh_from_state() -> void:
 		var row: HBoxContainer = HBoxContainer.new()
 		row.add_theme_constant_override(&"separation", 12)
 		_skill_list.add_child(row)
+
+		var icon_texture: Texture2D = SKILL_ICONS.get(skill_key, null) as Texture2D
+		if icon_texture != null:
+			var icon: TextureRect = TextureRect.new()
+			icon.custom_minimum_size = SKILL_ICON_SIZE
+			icon.texture = icon_texture
+			icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			row.add_child(icon)
 
 		var name_label: Label = Label.new()
 		name_label.text = SKILL_LABELS.get(skill_key, skill_key)

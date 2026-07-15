@@ -4,6 +4,11 @@ extends Control
 
 
 const BUTTON_HEIGHT: float = 46.0
+const SCROLL_TEXTURE: Texture2D = preload("res://assets/ui/menus/ui_dialogue_scroll.svg")
+const SCROLL_MARGIN_LEFT: int = 72
+const SCROLL_MARGIN_RIGHT: int = 72
+const SCROLL_MARGIN_TOP: int = 28
+const SCROLL_MARGIN_BOTTOM: int = 24
 
 var _box: PanelContainer
 var _name_label: Label
@@ -41,13 +46,20 @@ func _rebuild() -> void:
 	_box.offset_top = -148.0
 	_box.offset_bottom = -28.0
 	_box.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	var scroll_style: StyleBoxTexture = StyleBoxTexture.new()
+	scroll_style.texture = SCROLL_TEXTURE
+	scroll_style.texture_margin_left = SCROLL_MARGIN_LEFT
+	scroll_style.texture_margin_right = SCROLL_MARGIN_RIGHT
+	scroll_style.texture_margin_top = SCROLL_MARGIN_TOP
+	scroll_style.texture_margin_bottom = SCROLL_MARGIN_BOTTOM
+	_box.add_theme_stylebox_override(&"panel", scroll_style)
 	add_child(_box)
 
 	var pad: MarginContainer = MarginContainer.new()
-	pad.add_theme_constant_override(&"margin_left", 18)
-	pad.add_theme_constant_override(&"margin_right", 18)
-	pad.add_theme_constant_override(&"margin_top", 12)
-	pad.add_theme_constant_override(&"margin_bottom", 12)
+	pad.add_theme_constant_override(&"margin_left", SCROLL_MARGIN_LEFT)
+	pad.add_theme_constant_override(&"margin_right", SCROLL_MARGIN_RIGHT)
+	pad.add_theme_constant_override(&"margin_top", SCROLL_MARGIN_TOP)
+	pad.add_theme_constant_override(&"margin_bottom", SCROLL_MARGIN_BOTTOM)
 	_box.add_child(pad)
 
 	var vbox: VBoxContainer = VBoxContainer.new()

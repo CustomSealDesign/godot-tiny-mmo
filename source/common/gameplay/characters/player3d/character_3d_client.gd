@@ -59,6 +59,7 @@ var _bar_hide_tween: Tween
 
 @onready var body: CharacterBody3D = $Body
 @onready var model_mesh: MeshInstance3D = $Body/Model/MeshInstance3D
+@onready var sprite_billboard: Sprite3D = $Body/Model/Sprite3D
 @onready var progress_bar: ProgressBar = $ProgressBar
 @onready var display_name_label: Label = $DisplayNameLabel
 @onready var hand_pivot: Node3D = $Body/Model/HandPivot
@@ -160,13 +161,14 @@ func _on_stat_changed(stat_name: StringName, value: float) -> void:
 
 
 func _play_hit_feedback() -> void:
-	if model_mesh == null:
+	var visual: Node3D = sprite_billboard if sprite_billboard != null else model_mesh
+	if visual == null:
 		return
 	if _hit_flash_tween != null and _hit_flash_tween.is_running():
 		_hit_flash_tween.kill()
 	_hit_flash_tween = create_tween()
-	_hit_flash_tween.tween_property(model_mesh, ^"modulate", Color(2.0, 0.5, 0.5, 1.0), 0.05)
-	_hit_flash_tween.tween_property(model_mesh, ^"modulate", Color.WHITE, 0.18)
+	_hit_flash_tween.tween_property(visual, ^"modulate", Color(2.0, 0.5, 0.5, 1.0), 0.05)
+	_hit_flash_tween.tween_property(visual, ^"modulate", Color.WHITE, 0.18)
 	if is_instance_valid(Client) and Client.audio_manager != null:
 		Client.audio_manager.play_sfx(
 			"res://assets/audio/sfx/hit.wav",
@@ -203,7 +205,9 @@ func _set_anim(new_anim: Animations) -> void:
 
 func _set_flip(new_flip: bool) -> void:
 	flipped = new_flip
-	if model_mesh != null:
+	if sprite_billboard != null:
+		sprite_billboard.flip_h = new_flip
+	elif model_mesh != null:
 		model_mesh.scale.x = -1.0 if new_flip else 1.0
 
 

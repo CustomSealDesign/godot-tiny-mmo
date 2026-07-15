@@ -6,6 +6,7 @@ extends PanelContainer
 
 const COLUMNS: int = 4
 const SLOT_SIZE: Vector2 = Vector2(40, 40)
+const SLOT_FRAME_TEXTURE: Texture2D = preload("res://assets/ui/menus/ui_slot_frame.svg")
 
 var _grid: GridContainer
 var _slot_buttons: Array[Button] = []
@@ -106,6 +107,7 @@ func _build_ui() -> void:
 		button.clip_contents = true
 		button.focus_mode = Control.FOCUS_NONE
 		button.mouse_filter = Control.MOUSE_FILTER_PASS
+		_apply_slot_frame(button)
 		button.gui_input.connect(_on_slot_gui_input.bind(slot_index))
 		_grid.add_child(button)
 		_slot_buttons.append(button)
@@ -195,3 +197,10 @@ func _clear_slot_button(button: Button) -> void:
 	button.tooltip_text = ""
 	for child: Node in button.get_children():
 		child.queue_free()
+
+
+func _apply_slot_frame(button: Button) -> void:
+	var style: StyleBoxTexture = StyleBoxTexture.new()
+	style.texture = SLOT_FRAME_TEXTURE
+	for state: StringName in [&"normal", &"hover", &"pressed", &"focus", &"disabled"]:
+		button.add_theme_stylebox_override(state, style)
