@@ -30,6 +30,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 7:
 		_migration_v7(db)
 		_set_schema_version(db, 7)
+	if version < 8:
+		_migration_v8(db)
+		_set_schema_version(db, 8)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -183,6 +186,16 @@ static func _migration_v7(db: SQLite) -> void:
 		"deleted_at_ms": {"data_type": "int", "not_null": false}
 	})
 	db.query("CREATE UNIQUE INDEX IF NOT EXISTS idx_mail_state_pk ON mail_state(player_id, mail_id);")
+
+
+## v8: Xianxia cultivation + standalone woodcutting XP columns on players.
+static func _migration_v8(db: SQLite) -> void:
+	if not _column_exists(db, "players", "qi_level"):
+		db.query("ALTER TABLE players ADD COLUMN qi_level INTEGER NOT NULL DEFAULT 0;")
+	if not _column_exists(db, "players", "cultivation_realm"):
+		db.query("ALTER TABLE players ADD COLUMN cultivation_realm TEXT NOT NULL DEFAULT 'Mortal';")
+	if not _column_exists(db, "players", "woodcutting_xp"):
+		db.query("ALTER TABLE players ADD COLUMN woodcutting_xp INTEGER NOT NULL DEFAULT 0;")
 
 
 static func _column_exists(db: SQLite, table: String, column: String) -> bool:

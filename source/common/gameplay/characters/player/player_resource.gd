@@ -51,6 +51,13 @@ const HEALTH_PER_LEVEL: float = 5.0
 ## Character experience toward the next level (resets to the overflow on level-up).
 @export var experience: int
 
+## Xianxia cultivation tier — persisted and synced to the client HUD.
+@export var qi_level: int = 0
+## Named cultivation realm (e.g. "Mortal", "Qi Condensation").
+@export var cultivation_realm: String = "Mortal"
+## Standalone woodcutting experience counter for the OSRS-style skill track.
+@export var woodcutting_xp: int = 0
+
 ## Profession skills: skill_name (&"mining", &"woodcutting", ...) -> {"level": int, "xp": int}.
 ## Generalizes to any gathering/crafting profession; persisted as JSON.
 @export var skills: Dictionary

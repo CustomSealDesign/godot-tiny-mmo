@@ -287,6 +287,7 @@ func instantiate_player(peer_id: int) -> Player:
 			new_player.stats_component.get_stat(Stat.MANA_MAX)
 		)
 		WorldServer.curr.data_push.rpc_id(peer_id, &"stats.get", new_player.stats_component.stats.values)
+		CultivationService.push_to_peer(peer_id, new_player.player_resource)
 	new_player.ready.connect(setup_new_player,CONNECT_ONE_SHOT)
 	return new_player
 

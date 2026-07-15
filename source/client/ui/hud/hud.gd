@@ -13,6 +13,7 @@ var _chat_icon: TextureRect
 ## Bumped on every player.died push so an in-flight respawn countdown can detect that a newer
 ## death event superseded it and bail (the newest invocation owns the death overlay).
 var _death_gen: int = 0
+var _cultivation_hud: CultivationHud
 ## Gameplay nodes we hid because a menu opened — restored (only these) on close, so nodes with
 ## their own visibility gating (touch-only sticks, tracked-only quest tracker) that were already
 ## hidden don't get force-shown.
@@ -96,6 +97,10 @@ func _ready() -> void:
 
 	# Dungeon run HUD (live clock + revive pool) — self-contained; shows itself on dungeon.hud pushes.
 	add_child(DungeonHud.new())
+
+	# Xianxia cultivation + woodcutting XP strip (top-left).
+	_cultivation_hud = CultivationHud.new()
+	add_child(_cultivation_hud)
 
 	# UI sound: wire every Button under the HUD to tap/hover cues (menus build theirs lazily, so also
 	# watch node_added). The gateway has its own wiring; this is scoped to the in-game HUD subtree.
@@ -221,7 +226,7 @@ func _refresh_hud_for_menus() -> void:
 		# quest is tracked). Re-entrancy from stacked menus is a no-op (list already populated).
 		if _hidden_for_menu.is_empty():
 			for node: CanvasItem in [
-				$TwinSticks, $Chat, $QuestTracker, $ItemSlots, $StatusBar, $AbilityBar, $Resources, $MenuButtons
+				$TwinSticks, $Chat, $QuestTracker, $ItemSlots, $StatusBar, $AbilityBar, $Resources, $MenuButtons, _cultivation_hud
 			]:
 				if node.visible:
 					node.hide()
