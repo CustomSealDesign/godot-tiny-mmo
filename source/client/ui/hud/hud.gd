@@ -14,6 +14,7 @@ var _chat_icon: TextureRect
 ## death event superseded it and bail (the newest invocation owns the death overlay).
 var _death_gen: int = 0
 var _cultivation_hud: CultivationHud
+var _inventory_slots_hud: InventorySlotsHud
 ## Gameplay nodes we hid because a menu opened — restored (only these) on close, so nodes with
 ## their own visibility gating (touch-only sticks, tracked-only quest tracker) that were already
 ## hidden don't get force-shown.
@@ -101,6 +102,10 @@ func _ready() -> void:
 	# Xianxia cultivation + woodcutting XP strip (top-left).
 	_cultivation_hud = CultivationHud.new()
 	add_child(_cultivation_hud)
+
+	# OSRS-style 28-slot inventory grid (bottom-right).
+	_inventory_slots_hud = InventorySlotsHud.new()
+	add_child(_inventory_slots_hud)
 
 	# UI sound: wire every Button under the HUD to tap/hover cues (menus build theirs lazily, so also
 	# watch node_added). The gateway has its own wiring; this is scoped to the in-game HUD subtree.

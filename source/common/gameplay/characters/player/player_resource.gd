@@ -40,6 +40,9 @@ const HEALTH_PER_LEVEL: float = 5.0
 @export var skin_id: int = 1 # Default skin
 
 @export var inventory: Dictionary
+## OSRS-style fixed 28-slot bag: Array of { "item_id": int, "quantity": int }.
+## Empty slots use item_id 0. Persisted as slot_inventory_json.
+@export var slot_inventory: Array = []
 ## Equipped gear: gear-slot key (&"weapon", &"torso", ...) -> item_id. Equipped items
 ## live here, NOT in inventory (they're moved out on equip, back on unequip).
 @export var equipment: Dictionary
