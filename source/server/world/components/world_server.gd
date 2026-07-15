@@ -184,6 +184,11 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 		)
 		data_push.rpc_id.call_deferred(
 			peer_id,
+			&"bank.update",
+			BankInventoryService.payload(connected_players[peer_id])
+		)
+		data_push.rpc_id.call_deferred(
+			peer_id,
 			&"skills.update",
 			OsrsSkillService.payload(connected_players[peer_id])
 		)

@@ -35,6 +35,7 @@ func save_player(player: PlayerResource) -> void:
 	var attributes_json: String = JSON.stringify(player.attributes)
 	var inventory_json: String = JSON.stringify(player.inventory)
 	var slot_inventory_json: String = JSON.stringify(SlotInventory.to_payload(player.slot_inventory))
+	var bank_inventory_json: String = JSON.stringify(BankInventory.to_payload(player.bank_inventory))
 	var equipment_json: String = JSON.stringify(player.equipment)
 	var skills_json: String = JSON.stringify(player.skills)
 	var osrs_skills_json: String = JSON.stringify(player.osrs_skills)
@@ -68,9 +69,9 @@ func save_player(player: PlayerResource) -> void:
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, level, experience, qi_level, cultivation_realm, woodcutting_xp, available_attributes_points, "
 		+ "profile_status, profile_animation, "
-		+ "attributes_json, inventory_json, slot_inventory_json, equipment_json, skills_json, osrs_skills_json, osrs_quests_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, "
+		+ "attributes_json, inventory_json, slot_inventory_json, bank_inventory_json, equipment_json, skills_json, osrs_skills_json, osrs_quests_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -89,6 +90,7 @@ func save_player(player: PlayerResource) -> void:
 			attributes_json,
 			inventory_json,
 			slot_inventory_json,
+			bank_inventory_json,
 			equipment_json,
 			skills_json,
 			osrs_skills_json,
@@ -137,6 +139,7 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	Inventory.add_item(player.inventory, 1, 1) # health_potion
 	Inventory.add_item(player.inventory, Economy.gold_id(), 25)
 	player.slot_inventory = SlotInventory.empty_slots()
+	player.bank_inventory = BankInventory.empty_slots()
 	# Starting attribute points so a new character has something to spend.
 	player.available_attributes_points = PlayerResource.ATTRIBUTE_POINTS_PER_LEVEL
 	# Everyone who plays the alpha carries the badge for it.
@@ -248,6 +251,8 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	player.inventory = Inventory.normalize(JSON.parse_string(str(row.get("inventory_json", "{}"))) as Dictionary)
 	var slot_inventory_v: Variant = JSON.parse_string(str(row.get("slot_inventory_json", "[]")))
 	player.slot_inventory = SlotInventory.normalize(slot_inventory_v)
+	var bank_inventory_v: Variant = JSON.parse_string(str(row.get("bank_inventory_json", "[]")))
+	player.bank_inventory = BankInventory.normalize(bank_inventory_v)
 	# Equipment: { slot_key (StringName) -> item_id (int) }; JSON gives string keys/float values.
 	var equipment_raw: Dictionary = JSON.parse_string(str(row.get("equipment_json", "{}"))) as Dictionary
 	player.equipment = {}

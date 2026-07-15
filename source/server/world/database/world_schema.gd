@@ -42,6 +42,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 11:
 		_migration_v11(db)
 		_set_schema_version(db, 11)
+	if version < 12:
+		_migration_v12(db)
+		_set_schema_version(db, 12)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -223,6 +226,12 @@ static func _migration_v10(db: SQLite) -> void:
 static func _migration_v11(db: SQLite) -> void:
 	if not _column_exists(db, "players", "osrs_quests_json"):
 		db.query("ALTER TABLE players ADD COLUMN osrs_quests_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v12: Sect Vault bank — 200-slot item_id + quantity array (always stacks in bank).
+static func _migration_v12(db: SQLite) -> void:
+	if not _column_exists(db, "players", "bank_inventory_json"):
+		db.query("ALTER TABLE players ADD COLUMN bank_inventory_json TEXT NOT NULL DEFAULT '[]';")
 
 
 static func _column_exists(db: SQLite, table: String, column: String) -> bool:
