@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="16_hu6f0"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="17_5yoed"]
 [ext_resource type="Resource" uid="uid://dsvbif0isp6d5" path="res://source/common/gameplay/maps/components/mineable_nodes/flax.tres" id="18_hu6f0"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/spirit_tree/SpiritTree.tscn" id="19_spirit"]
 
 [node name="Woodland" type="Node2D" unique_id=1936915393 node_paths=PackedStringArray("replicated_props_container")]
 script = ExtResource("1_i1aj4")
@@ -175,3 +176,6 @@ data = ExtResource("18_hu6f0")
 y_sort_enabled = true
 position = Vector2(384, 88)
 data = ExtResource("18_hu6f0")
+
+[node name="SpiritTree" parent="." instance=ExtResource("19_spirit")]
+position = Vector2(256, -160)

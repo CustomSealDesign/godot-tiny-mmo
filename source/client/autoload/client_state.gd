@@ -113,6 +113,7 @@ func _ready() -> void:
 	Client.subscribe(&"active_guild_id.set", func(payload: Dictionary):
 		active_guild_id = payload.get("active_guild_id", 0))
 	Client.subscribe(&"cultivation.update", apply_cultivation)
+	Client.subscribe(&"woodcutting.result", _on_woodcutting_result)
 	Client.subscribe(&"stats.get", func(data: Dictionary):
 		stats.data.merge(data, true)
 	)
@@ -139,6 +140,16 @@ func apply_cultivation(data: Dictionary) -> void:
 	cultivation_realm = str(data.get("cultivation_realm", cultivation_realm))
 	woodcutting_xp = int(data.get("woodcutting_xp", woodcutting_xp))
 	cultivation_changed.emit()
+
+
+func _on_woodcutting_result(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		return
+	apply_cultivation(data)
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("+%d Woodcutting XP" % int(data.get("xp_gained", 0)))
+	lines.append("+%d Qi" % int(data.get("qi_gained", 0)))
+	Toaster.toast_group("Spirit Tree", lines)
 
 
 ## Server-pushed kill rewards: surface them as ONE grouped toast card

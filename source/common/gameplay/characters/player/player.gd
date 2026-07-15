@@ -4,6 +4,9 @@ extends Character
 
 var player_resource: PlayerResource
 
+## Server-side activity gate for gathering loops (idle, woodcutting, ...).
+var activity_state: int = PlayerActivityState.State.IDLE
+
 ## Synced guild tag — drives the blue ally health-bar tint guildmates see on each
 ## other. Synced like display_name (set_by_path → baseline + live dirty).
 var active_guild_id: int = 0:
