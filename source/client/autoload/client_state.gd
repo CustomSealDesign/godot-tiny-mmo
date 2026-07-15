@@ -48,6 +48,9 @@ signal cultivation_changed
 ## OSRS-style 28-slot bag mirrored from inventory.update / inventory.slots.get.
 var slot_inventory: Array = []
 signal inventory_changed
+## Sect Vault bank mirrored from bank.update / open_bank responses.
+var bank_inventory: Array = []
+signal bank_changed
 ## True while a blocking menu is open (NPC dialogue, shop, quest log, inventory).
 ## While set, the local player's movement and actions are suppressed, so you can't
 ## walk or fight with a menu up, and can't keep one open to act from afar. Only the
@@ -123,6 +126,7 @@ func _ready() -> void:
 		active_guild_id = payload.get("active_guild_id", 0))
 	Client.subscribe(&"cultivation.update", apply_cultivation)
 	Client.subscribe(&"inventory.update", apply_inventory)
+	Client.subscribe(&"bank.update", apply_bank)
 	Client.subscribe(&"skills.update", apply_skills)
 	Client.subscribe(&"quests.update", apply_quests)
 	Client.subscribe(&"alchemy.result", _on_alchemy_result)
@@ -163,6 +167,13 @@ func apply_inventory(data: Dictionary) -> void:
 	if slots_v is Array:
 		slot_inventory = slots_v
 		inventory_changed.emit()
+
+
+func apply_bank(data: Dictionary) -> void:
+	var slots_v: Variant = data.get("slots", [])
+	if slots_v is Array:
+		bank_inventory = slots_v
+		bank_changed.emit()
 
 
 func apply_skills(data: Dictionary) -> void:

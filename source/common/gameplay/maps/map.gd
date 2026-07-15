@@ -90,6 +90,8 @@ var duel_masters: Dictionary[int, DuelMaster]
 var spirit_trees: Dictionary[StringName, SpiritTree]
 ## node name -> AlchemyCauldron. The server resolves alchemy targets by name.
 var alchemy_cauldrons: Dictionary[StringName, AlchemyCauldron]
+## node name -> SectVault. The server resolves bank access by name.
+var sect_vaults: Dictionary[StringName, SectVault]
 ## node name -> Enemy. The server resolves OSRS-style combat targets by name.
 var enemies: Dictionary[StringName, Enemy]
 ## npc_id -> dialogue NPC (Sect Elder, ...). The server resolves interact_npc targets.
