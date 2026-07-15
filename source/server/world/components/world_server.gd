@@ -187,6 +187,11 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 			&"skills.update",
 			OsrsSkillService.payload(connected_players[peer_id])
 		)
+		data_push.rpc_id.call_deferred(
+			peer_id,
+			&"quests.update",
+			OsrsQuestService.payload(connected_players[peer_id])
+		)
 	else:
 		peer.disconnect_peer(peer_id)
 

@@ -41,6 +41,9 @@ var woodcutting_xp: int = 0
 ## OSRS-style skills mirrored from skills.update / skills.osrs.get.
 var osrs_skills: Dictionary = {}
 signal skills_changed
+## OSRS-style dialogue quest states mirrored from quests.update.
+var osrs_quests: Dictionary = {}
+signal quests_changed
 signal cultivation_changed
 ## OSRS-style 28-slot bag mirrored from inventory.update / inventory.slots.get.
 var slot_inventory: Array = []
@@ -121,6 +124,7 @@ func _ready() -> void:
 	Client.subscribe(&"cultivation.update", apply_cultivation)
 	Client.subscribe(&"inventory.update", apply_inventory)
 	Client.subscribe(&"skills.update", apply_skills)
+	Client.subscribe(&"quests.update", apply_quests)
 	Client.subscribe(&"alchemy.result", _on_alchemy_result)
 	Client.subscribe(&"alchemy.error", _on_alchemy_error)
 	Client.subscribe(&"cultivation.breakthrough", _on_cultivation_breakthrough)
@@ -166,6 +170,13 @@ func apply_skills(data: Dictionary) -> void:
 	if skills_v is Dictionary:
 		osrs_skills = skills_v
 		skills_changed.emit()
+
+
+func apply_quests(data: Dictionary) -> void:
+	var quests_v: Variant = data.get("quests", {})
+	if quests_v is Dictionary:
+		osrs_quests = quests_v
+		quests_changed.emit()
 
 
 func _on_alchemy_result(data: Dictionary) -> void:
@@ -216,6 +227,11 @@ func _on_woodcutting_result(data: Dictionary) -> void:
 	var lines: PackedStringArray = PackedStringArray()
 	lines.append("+%d Woodcutting XP" % int(data.get("xp_gained", 0)))
 	lines.append("+%d Qi" % int(data.get("qi_gained", 0)))
+	var gathering_xp: int = int(data.get("spirit_gathering_xp_gained", 0))
+	if gathering_xp > 0:
+		lines.append("+%d Spirit Gathering XP" % gathering_xp)
+		if bool(data.get("spirit_gathering_leveled_up", false)):
+			lines.append("Spirit Gathering Level %d!" % int(data.get("spirit_gathering_level", 1)))
 	var item_name: String = str(data.get("item_name", ""))
 	if not item_name.is_empty():
 		lines.append("+1 %s" % item_name)

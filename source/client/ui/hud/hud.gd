@@ -107,6 +107,9 @@ func _ready() -> void:
 	_inventory_slots_hud = InventorySlotsHud.new()
 	add_child(_inventory_slots_hud)
 
+	# OSRS-style NPC dialogue box (bottom-center).
+	add_child(DialogueHud.new())
+
 	# UI sound: wire every Button under the HUD to tap/hover cues (menus build theirs lazily, so also
 	# watch node_added). The gateway has its own wiring; this is scoped to the in-game HUD subtree.
 	_wire_subtree(self)

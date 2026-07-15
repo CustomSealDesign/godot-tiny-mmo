@@ -39,6 +39,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 10:
 		_migration_v10(db)
 		_set_schema_version(db, 10)
+	if version < 11:
+		_migration_v11(db)
+		_set_schema_version(db, 11)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -214,6 +217,12 @@ static func _migration_v9(db: SQLite) -> void:
 static func _migration_v10(db: SQLite) -> void:
 	if not _column_exists(db, "players", "osrs_skills_json"):
 		db.query("ALTER TABLE players ADD COLUMN osrs_skills_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v11: OSRS-style dialogue quest states (0/1/2 per quest id).
+static func _migration_v11(db: SQLite) -> void:
+	if not _column_exists(db, "players", "osrs_quests_json"):
+		db.query("ALTER TABLE players ADD COLUMN osrs_quests_json TEXT NOT NULL DEFAULT '{}';")
 
 
 static func _column_exists(db: SQLite, table: String, column: String) -> bool:

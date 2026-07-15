@@ -92,6 +92,8 @@ var spirit_trees: Dictionary[StringName, SpiritTree]
 var alchemy_cauldrons: Dictionary[StringName, AlchemyCauldron]
 ## node name -> Enemy. The server resolves OSRS-style combat targets by name.
 var enemies: Dictionary[StringName, Enemy]
+## npc_id -> dialogue NPC (Sect Elder, ...). The server resolves interact_npc targets.
+var dialogue_npcs: Dictionary[StringName, Node]
 ## ground item id -> GroundItem. The server resolves floor loot pickups by id.
 var ground_items: Dictionary[int, GroundItem]
 
