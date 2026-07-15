@@ -10,6 +10,8 @@ const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/com
 
 @export var display_name: String = "Spirit Wolf"
 @export var max_hp: int = 20
+@export var defense_level: int = 2
+@export var defense_bonus: int = 0
 @export var attack_damage: int = 5
 @export var loot_item_id: int = ItemDatabase.WOLF_CORE
 @export var loot_quantity: int = 1

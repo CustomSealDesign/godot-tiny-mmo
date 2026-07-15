@@ -10,6 +10,10 @@ const SKILL_LABELS: Dictionary = {
 	"Combat": "Combat",
 	"Mining": "Mining",
 	"Forging": "Forging",
+	"Attack": "Attack",
+	"Strength": "Strength",
+	"Defense": "Defense",
+	"Hitpoints": "Hitpoints",
 }
 
 @onready var _skill_list: VBoxContainer = %OsrsSkillList
@@ -55,7 +59,17 @@ func _refresh_from_state() -> void:
 	for child: Node in _skill_list.get_children():
 		child.queue_free()
 
-	for skill_key: String in ["Spirit_Gathering", "Alchemy", "Combat", "Mining", "Forging"]:
+	for skill_key: String in [
+		"Spirit_Gathering",
+		"Mining",
+		"Forging",
+		"Alchemy",
+		"Attack",
+		"Strength",
+		"Defense",
+		"Hitpoints",
+		"Combat",
+	]:
 		var entry: Dictionary = ClientState.osrs_skills.get(skill_key, {}) as Dictionary
 		var xp: int = int(entry.get("xp", 0))
 		var level: int = int(entry.get("level", SkillManager.get_level_from_xp(xp)))

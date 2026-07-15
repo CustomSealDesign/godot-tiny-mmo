@@ -72,8 +72,13 @@ const OSRS_EQUIPMENT_SLOTS: Array[StringName] = [&"head", &"chest", &"legs", &"w
 @export var skills: Dictionary
 
 ## OSRS-style skills: skill_name -> total XP (level derived via SkillManager).
-## Starting skills: Spirit_Gathering, Alchemy, Combat. Persisted as osrs_skills_json.
+## Starting skills: Spirit_Gathering, Alchemy, Combat, Mining, Forging, Attack,
+## Strength, Defense, Hitpoints. Persisted as osrs_skills_json.
 @export var osrs_skills: Dictionary = {}
+
+## Active melee combat stance: "accurate" (Attack), "aggressive" (Strength),
+## or "defensive" (Defense). Persisted as combat_stance column.
+@export var combat_stance: String = "accurate"
 
 ## OSRS-style dialogue quests: quest_id (StringName) -> state int (0 unstarted, 1 in progress, 2 completed).
 ## Persisted as osrs_quests_json and synced to the client like osrs_skills.
@@ -211,6 +216,21 @@ func ensure_osrs_skills() -> void:
 	for skill_name: StringName in SkillManager.STARTING_SKILLS:
 		if not osrs_skills.has(skill_name):
 			osrs_skills[skill_name] = 0
+
+
+func ensure_combat_stance() -> void:
+	if combat_stance not in ["accurate", "aggressive", "defensive"]:
+		combat_stance = "accurate"
+
+
+func get_combat_stance() -> String:
+	ensure_combat_stance()
+	return combat_stance
+
+
+func set_combat_stance(stance: String) -> void:
+	if stance in ["accurate", "aggressive", "defensive"]:
+		combat_stance = stance
 
 
 func ensure_osrs_equipment() -> void:
