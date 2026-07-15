@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://c8player3dscene" path="res://source/common/gameplay/characters/player3d/player_3d.tscn" id="1_base"]
 [ext_resource type="Script" path="res://source/client/local_player/local_player_3d.gd" id="2_local"]
-[ext_resource type="Script" path="res://source/client/local_player/click_move_input_3d.gd" id="3_click"]
+[ext_resource type="Script" path="res://source/client/local_player/grid_camera_controller.gd" id="3_camera"]
 
 [node name="LocalPlayer" instance=ExtResource("1_base")]
 script = ExtResource("2_local")
@@ -12,11 +12,7 @@ transform = Transform3D(1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 
 projection = 1
 size = 12.0
 current = true
+script = ExtResource("3_camera")
 
 [node name="AudioListener3D" type="AudioListener3D" parent="Camera3D"]
 current = true
-
-[node name="ClickMoveInput3D" type="Node" parent="."]
-script = ExtResource("3_click")
-enabled = true
-floor_collision_mask = 1

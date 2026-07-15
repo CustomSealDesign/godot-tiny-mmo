@@ -1,6 +1,8 @@
 class_name LocalPlayer
 extends Player3D
 
+signal movement_finished
+
 const PVP_TOAST_COLOR: Color = Color(1.0, 0.5, 0.45)
 const SAFE_TOAST_COLOR: Color = Color(0.55, 0.95, 0.6)
 const NET_SEND_INTERVAL_S: float = 1.0 / 20.0
@@ -29,8 +31,14 @@ var _equip_draw_token: int = 0
 var _equip_bar: ChannelVisual = null
 var _trauma: float = 0.0
 var _net_send_accum: float = 0.0
-var _has_nav_target: bool = false
 var _woodcutting: bool = false
+
+var pathfinder: GridPathfinder
+var _current_path: PackedVector2Array = PackedVector2Array()
+var _path_index: int = 0
+var _target_plane: Vector2 = Vector2.ZERO
+var _is_moving: bool = false
+var _pending_interact_tree: SpiritTree = null
 
 var fid_position: int
 var fid_flipped: int
@@ -39,9 +47,7 @@ var fid_pivot: int
 
 var synchronizer_manager: StateSynchronizerManagerClient
 
-@onready var camera_3d: Camera3D = $Camera3D
-@onready var nav_agent: NavigationAgent3D = $Body/NavigationAgent3D
-@onready var click_input: ClickMoveInput3D = $ClickMoveInput3D
+@onready var camera_3d: GridCameraController = $Camera3D
 
 
 func _ready() -> void:
@@ -57,19 +63,18 @@ func _ready() -> void:
 	fid_anim = PathRegistry.id_of(":anim")
 	fid_pivot = PathRegistry.id_of(":pivot")
 
-	click_input.camera = camera_3d
-	click_input.body = body
-	click_input.floor_collision_mask = floor_collision_mask
-	click_input.move_target_selected.connect(_on_move_target_selected)
-	click_input.look_plane_changed.connect(_on_look_plane_changed)
-
-	nav_agent.path_desired_distance = 0.35
-	nav_agent.target_desired_distance = 0.35
-	nav_agent.avoidance_enabled = true
-	nav_agent.velocity_computed.connect(_on_nav_velocity_computed)
-
+	pathfinder = GridPathfinder.new()
 	await get_tree().physics_frame
-	nav_agent.target_position = body.global_position
+	pathfinder.configure(
+		body.get_world_3d().direct_space_state,
+		floor_collision_mask,
+		floor_probe_height,
+		floor_probe_depth
+	)
+	camera_3d.setup(self, pathfinder)
+
+	global_position = GridMovement.snap_plane(global_position)
+	_sync_body_from_plane()
 
 	_apply_settings()
 	ClientState.settings.setting_changed.connect(_on_settings_changed)
@@ -110,9 +115,64 @@ func wants_net_smoothing() -> bool:
 	return false
 
 
+func is_moving_on_grid() -> bool:
+	return _is_moving
+
+
+func move_to_plane(destination_plane: Vector2, interact_tree: SpiritTree = null) -> void:
+	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
+		return
+	if _woodcutting:
+		request_stop_woodcutting()
+	if _channeling and not _channel_mobile:
+		_cancel_channel()
+
+	_pending_interact_tree = interact_tree
+	_stop_grid_movement()
+
+	var snapped_destination: Vector2 = GridMovement.snap_plane(destination_plane)
+	_current_path = pathfinder.find_path(global_position, snapped_destination)
+	if _current_path.is_empty():
+		movement_finished.emit()
+		return
+
+	_path_index = 0
+	if _current_path.size() > 1 and _current_path[0].distance_to(global_position) < GridMovement.WAYPOINT_REACHED_DIST:
+		_path_index = 1
+	_set_grid_target()
+
+
+func _stop_grid_movement() -> void:
+	_is_moving = false
+	_current_path = PackedVector2Array()
+	_path_index = 0
+	body.velocity = Vector3.ZERO
+
+
+func _set_grid_target() -> void:
+	if _path_index < _current_path.size():
+		_target_plane = _current_path[_path_index]
+		_is_moving = true
+	else:
+		_finish_grid_movement()
+
+
+func _finish_grid_movement() -> void:
+	_stop_grid_movement()
+	global_position = GridMovement.snap_plane(global_position)
+	_sync_body_from_plane()
+	input_direction = Vector2.ZERO
+
+	var tree: SpiritTree = _pending_interact_tree
+	_pending_interact_tree = null
+	movement_finished.emit()
+	if tree != null and is_instance_valid(tree):
+		tree.on_player_arrived()
+
+
 func _physics_process(delta: float) -> void:
+	process_movement(delta)
 	process_input()
-	process_movement()
 	process_animation(delta)
 	process_synchronization()
 	_notify_zone_transition()
@@ -127,27 +187,18 @@ func _process(delta: float) -> void:
 	camera_3d.v_offset = randf_range(-1.0, 1.0) * shake
 
 
-func _on_move_target_selected(world_position: Vector3) -> void:
-	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
-		return
-	if _woodcutting:
-		request_stop_woodcutting()
-	if _channeling and not _channel_mobile:
-		_cancel_channel()
-	nav_agent.target_position = world_position
-	_has_nav_target = true
-
-
-func _on_look_plane_changed(plane_direction: Vector2) -> void:
-	look_direction = plane_direction
-
-
-func process_movement() -> void:
+func process_movement(delta: float) -> void:
 	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms \
 			or (_channeling and not _channel_mobile) or _woodcutting:
+		_stop_grid_movement()
 		body.velocity = Vector3.ZERO
 		body.move_and_slide()
-		_publish_plane_from_body()
+		return
+
+	if not _is_moving or _current_path.is_empty():
+		body.velocity = Vector3.ZERO
+		body.move_and_slide()
+		input_direction = Vector2.ZERO
 		return
 
 	var move_speed: float = stats_component.get_stat(Stat.MOVE_SPEED)
@@ -156,48 +207,42 @@ func process_movement() -> void:
 	if _channeling and _channel_mobile:
 		move_speed *= _channel_speed_mult
 
-	if _has_nav_target and not nav_agent.is_navigation_finished():
-		var next_position: Vector3 = nav_agent.get_next_path_position()
-		var direction: Vector3 = next_position - body.global_position
-		direction.y = 0.0
-		if direction.length_squared() > 0.0001:
-			var desired_velocity: Vector3 = direction.normalized() * move_speed
-			if nav_agent.avoidance_enabled:
-				nav_agent.set_velocity(desired_velocity)
-			else:
-				body.velocity = desired_velocity
-				body.move_and_slide()
-				_publish_plane_from_body()
-			input_direction = PlaneCoords3D.world_to_plane(desired_velocity).normalized()
+	var direction_plane: Vector2 = _target_plane - global_position
+	var distance: float = direction_plane.length()
+	if distance <= GridMovement.WAYPOINT_REACHED_DIST:
+		global_position = _target_plane
+		_sync_body_from_plane()
+		_path_index += 1
+		if _path_index < _current_path.size():
+			_set_grid_target()
 		else:
-			body.velocity = Vector3.ZERO
-			body.move_and_slide()
-			_publish_plane_from_body()
-			input_direction = Vector2.ZERO
-	else:
-		_has_nav_target = false
-		body.velocity = Vector3.ZERO
-		body.move_and_slide()
-		_publish_plane_from_body()
-		input_direction = Vector2.ZERO
+			_finish_grid_movement()
+		return
 
-
-func _on_nav_velocity_computed(safe_velocity: Vector3) -> void:
-	safe_velocity.y = 0.0
-	body.velocity = safe_velocity
+	var direction_world: Vector3 = PlaneCoords3D.plane_to_world(direction_plane.normalized(), 0.0)
+	body.velocity = direction_world * move_speed
 	body.move_and_slide()
-	_publish_plane_from_body()
-	input_direction = PlaneCoords3D.world_to_plane(safe_velocity).normalized()
-
-
-func _publish_plane_from_body() -> void:
 	global_position = PlaneCoords3D.world_to_plane(body.global_position)
+	input_direction = direction_plane.normalized()
+
+	if body.global_position.distance_to(
+			PlaneCoords3D.plane_to_world(_target_plane, body.global_position.y)
+		) <= GridMovement.WAYPOINT_REACHED_DIST:
+		global_position = _target_plane
+		_sync_body_from_plane()
+		_path_index += 1
+		if _path_index < _current_path.size():
+			_set_grid_target()
+		else:
+			_finish_grid_movement()
+
+	# Face movement direction on the model rig.
+	if direction_plane.length_squared() > 0.0001:
+		var target_rotation: float = atan2(direction_plane.x, direction_plane.y)
+		hand_pivot.rotation.y = lerp_angle(hand_pivot.rotation.y, target_rotation, delta * 10.0)
 
 
 func process_input() -> void:
-	click_input.enabled = not (_dead or _has_gui_focus() or ClientState.menu_open \
-			or Time.get_ticks_msec() < _movement_lock_until_ms)
-
 	if _dead or _has_gui_focus() or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
 		action_input = false
 		return
@@ -206,7 +251,7 @@ func process_input() -> void:
 		action_input = false
 		return
 
-	action_input = Input.is_action_pressed(&"player_shoot") and not click_input.ui_blocks_combat()
+	action_input = Input.is_action_pressed(&"player_shoot") and not _ui_blocks_combat()
 
 	if is_equip_drawing():
 		action_input = false
@@ -238,6 +283,16 @@ func process_input() -> void:
 			{"d": look_direction, "i": 0}, InstanceClient.current.name)
 
 
+func _ui_blocks_combat() -> bool:
+	if ClientState.world_interactables_hovered > 0:
+		return true
+	var focused: Control = get_viewport().gui_get_focus_owner()
+	if focused is LineEdit or focused is TextEdit:
+		return true
+	var hovered: Control = get_viewport().gui_get_hovered_control()
+	return hovered != null and hovered.mouse_filter == Control.MOUSE_FILTER_STOP
+
+
 func process_animation(delta: float) -> void:
 	if _dead:
 		if anim != Animations.DEATH:
@@ -260,7 +315,7 @@ func _update_hand_pivot(delta: float) -> void:
 
 
 func process_synchronization() -> void:
-	var plane_position: Vector2 = get_plane_position()
+	var plane_position: Vector2 = GridMovement.snap_plane(get_plane_position())
 	var pairs: Array[Array] = [
 		[fid_position, plane_position],
 		[fid_flipped, flipped],
@@ -285,8 +340,7 @@ func _on_player_died(data: Dictionary) -> void:
 	if not is_instance_valid(self):
 		return
 	apply_plane_position(_respawn_position)
-	nav_agent.target_position = body.global_position
-	_has_nav_target = false
+	_stop_grid_movement()
 	_dead = false
 
 
@@ -294,8 +348,7 @@ func _on_sparring_match_state(payload: Dictionary) -> void:
 	var pos: Variant = payload.get("position", null)
 	if pos is Vector2 and pos != Vector2.ZERO:
 		apply_plane_position(pos)
-		nav_agent.target_position = body.global_position
-		_has_nav_target = false
+		_stop_grid_movement()
 		_movement_lock_until_ms = Time.get_ticks_msec() + int(payload.get("countdown_ms", 500))
 	if bool(payload.get("in_match", false)):
 		Character.spar_ally_peers = payload.get("allies", [])
@@ -323,8 +376,7 @@ func _on_teleport(payload: Dictionary) -> void:
 	var pos: Variant = payload.get("position", null)
 	if pos is Vector2:
 		apply_plane_position(pos)
-		nav_agent.target_position = body.global_position
-		_has_nav_target = false
+		_stop_grid_movement()
 		_movement_lock_until_ms = Time.get_ticks_msec() + 500
 
 
@@ -367,8 +419,7 @@ func _on_woodcutting_state(payload: Dictionary) -> void:
 	var active: bool = bool(payload.get("active", false))
 	_woodcutting = active
 	if active:
-		_has_nav_target = false
-		nav_agent.target_position = body.global_position
+		_stop_grid_movement()
 		input_direction = Vector2.ZERO
 
 
@@ -458,7 +509,6 @@ func _apply_camera_limits(_map: Map) -> void:
 
 
 func set_input_active(active: bool) -> void:
-	click_input.enabled = active
 	if not active:
 		Input.action_release(&"player_shoot")
 
