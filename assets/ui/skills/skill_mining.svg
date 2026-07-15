@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="crysG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9f2d4"/>
+      <stop offset="1" stop-color="#3f9e73"/>
+    </linearGradient>
+  </defs>
+  <g id="badge">
+    <circle cx="32" cy="32" r="29" fill="#17171c" fill-opacity="0.9"/>
+    <circle cx="32" cy="32" r="28.4" fill="none" stroke="#a8813f" stroke-opacity="0.85" stroke-width="1.6"/>
+    <circle cx="32" cy="32" r="25.4" fill="none" stroke="#4fa87c" stroke-opacity="0.22" stroke-width="1"/>
+  </g>
+  <circle cx="43" cy="42" r="11" fill="#7fd4a8" fill-opacity="0.12"/>
+  <path d="M45 29 L52 42 L48 52 L40 50 L39 36 Z" fill="url(#crysG)" stroke="#2e7d58" stroke-opacity="0.6" stroke-width="1"/>
+  <path d="M45 29 L44 49" fill="none" stroke="#eafff3" stroke-opacity="0.5" stroke-width="1"/>
+  <path d="M37 40 L40 51 L33 52.5 L32.5 44 Z" fill="#59b884" stroke="#2e7d58" stroke-opacity="0.6" stroke-width="1"/>
+  <path d="M14.5 12.5 L35 37.5" fill="none" stroke="#7a5a35" stroke-width="4" stroke-linecap="round"/>
+  <path d="M7.5 25 Q6 5.5 27 6.5 L25.5 10.3 Q10.5 9.8 11.4 24 Z" fill="#9aa3ab" stroke="#6a727a" stroke-width="0.8"/>
+  <path d="M8.5 22 Q7.8 8.6 24.5 7.6" fill="none" stroke="#cdd4da" stroke-opacity="0.6" stroke-width="1"/>
+  <path d="M39.5 34.5 L43 31 M41 39.5 L46 39.5 M36.5 42.5 L38 47" fill="none" stroke="#ffd97a" stroke-width="1.7" stroke-linecap="round"/>
+  <circle cx="38.2" cy="36.8" r="1.4" fill="#fff1c4"/>
+</svg>
