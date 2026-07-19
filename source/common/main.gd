@@ -34,12 +34,24 @@ func start_as_client() -> void:
 
 
 func start_as_gateway_server() -> void:
+	_disable_rendering_for_server()
 	get_tree().change_scene_to_file.call_deferred("res://source/server/gateway/gateway_main.tscn")
 
 
 func start_as_master_server() -> void:
+	_disable_rendering_for_server()
 	get_tree().change_scene_to_file.call_deferred("res://source/server/master/master_main.tscn")
 
 
 func start_as_world_server() -> void:
+	_disable_rendering_for_server()
 	get_tree().change_scene_to_file.call_deferred("res://source/server/world/world_main.tscn")
+
+
+## Servers never display anything, but when launched WITHOUT --headless (e.g. the editor's
+## multi-instance run) they still spin a full render loop and compete with the client for
+## the GPU — which stalled the client's display ("frozen" screen while the game kept
+## simulating at 60 fps). Stopping the render loop makes a server instance do zero GPU work
+## even with a window open, freeing the GPU for the client. No-op under --headless.
+func _disable_rendering_for_server() -> void:
+	RenderingServer.render_loop_enabled = false
