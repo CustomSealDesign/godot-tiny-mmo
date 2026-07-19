@@ -1,0 +1,26 @@
+{
+  "9001": {
+    "name": "Spirit Wood",
+    "stackable": false,
+    "icon": "res://assets/sprites/items/icons/mystic/Inventory_10.png",
+    "qi_value": 5
+  },
+  "9002": {
+    "name": "Low-Grade Spirit Stone",
+    "stackable": true,
+    "icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
+    "qi_value": 0
+  },
+  "9003": {
+    "name": "Wolf Core",
+    "stackable": false,
+    "icon": "res://assets/sprites/items/icons/mystic/Inventory_14.png",
+    "qi_value": 50
+  },
+  "9004": {
+    "name": "Spirit Coins",
+    "stackable": true,
+    "icon": "res://assets/sprites/items/icons/mystic/Inventory_19.png",
+    "qi_value": 0
+  }
+}

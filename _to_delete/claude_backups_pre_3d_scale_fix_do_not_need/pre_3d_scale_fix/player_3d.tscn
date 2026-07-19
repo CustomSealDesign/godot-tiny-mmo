@@ -1,0 +1,86 @@
+[gd_scene load_steps=10 format=3 uid="uid://c8player3dscene"]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/player3d/player_3d.gd" id="1_player3d"]
+[ext_resource type="Script" path="res://source/common/network/sync/state_synchronizer.gd" id="2_sync"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/components/stats_component.gd" id="3_stats"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/components/equipment_component.gd" id="4_equip"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/player/display_name_label.gd" id="5_name"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/outer_disciple.png" id="6_sprite"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.35
+height = 1.2
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.35
+height = 1.2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
+bg_color = Color(0.6, 0.6, 0.6, 0.521569)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
+bg_color = Color(0.694118, 0.101961, 0.14902, 0.705882)
+
+[node name="Player3D" type="Node2D"]
+script = ExtResource("1_player3d")
+
+[node name="Body" type="CharacterBody3D" parent="."]
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Model" type="Node3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Body/Model"]
+visible = false
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Sprite3D" type="Sprite3D" parent="Body/Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
+billboard = 2
+texture = ExtResource("6_sprite")
+hframes = 3
+vframes = 2
+pixel_size = 0.0025
+
+[node name="HandPivot" type="Node3D" parent="Body/Model"]
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+offset_left = -16.0
+offset_top = -38.0
+offset_right = 16.0
+offset_bottom = -34.0
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
+step = 0.5
+value = 50.0
+allow_greater = true
+show_percentage = false
+
+[node name="DisplayNameLabel" type="Label" parent="."]
+offset_left = -23.7
+offset_right = 213.3
+offset_bottom = 45.0
+scale = Vector2(0.2, 0.2)
+theme_override_font_sizes/font_size = 32
+text = "Player"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("5_name")
+
+[node name="StateSynchronizer" type="Node" parent="." node_paths=PackedStringArray("root_node")]
+script = ExtResource("2_sync")
+root_node = NodePath("..")
+
+[node name="StatsComponent" type="Node" parent="." node_paths=PackedStringArray("synchronizer")]
+script = ExtResource("3_stats")
+synchronizer = NodePath("../StateSynchronizer")
+
+[node name="EquipmentComponent" type="Node" parent="." node_paths=PackedStringArray("character", "synchronizer")]
+script = ExtResource("4_equip")
+character = NodePath("..")
+synchronizer = NodePath("../StateSynchronizer")

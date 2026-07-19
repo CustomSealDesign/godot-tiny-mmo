@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bronzeG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c99a52"/>
+      <stop offset="1" stop-color="#7a5628"/>
+    </linearGradient>
+  </defs>
+  <g id="badge">
+    <circle cx="32" cy="32" r="29" fill="#17171c" fill-opacity="0.9"/>
+    <circle cx="32" cy="32" r="28.4" fill="none" stroke="#a8813f" stroke-opacity="0.85" stroke-width="1.6"/>
+    <circle cx="32" cy="32" r="25.4" fill="none" stroke="#4fa87c" stroke-opacity="0.22" stroke-width="1"/>
+  </g>
+  <path d="M27.5 21.5 Q24 17 27.5 12.5 Q30.5 9 28.5 5.5" fill="none" stroke="#8fd9b3" stroke-opacity="0.75" stroke-width="2" stroke-linecap="round"/>
+  <path d="M36 20.5 Q39 16.5 36.5 12.5 Q34.5 9.5 36 7" fill="none" stroke="#8fd9b3" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round"/>
+  <path d="M21.5 42.5 L18.5 51.5 M32 45.5 L32 53 M42.5 42.5 L45.5 51.5" fill="none" stroke="#6b4a24" stroke-width="4" stroke-linecap="round"/>
+  <path d="M14.5 29 Q14.5 45.5 32 45.5 Q49.5 45.5 49.5 29 Z" fill="url(#bronzeG)"/>
+  <ellipse cx="25.5" cy="34.5" rx="4.6" ry="2.6" fill="#e8c37a" fill-opacity="0.3"/>
+  <ellipse cx="32" cy="29" rx="17.6" ry="4.4" fill="#6b4c22"/>
+  <ellipse cx="32" cy="29" rx="14.2" ry="3" fill="#241609"/>
+  <ellipse cx="32" cy="28.6" rx="11" ry="2.1" fill="#7fd4a8" fill-opacity="0.55"/>
+  <path d="M17.4 25.8 Q13.8 20.2 19.8 18.6 M46.6 25.8 Q50.2 20.2 44.2 18.6" fill="none" stroke="#7a5729" stroke-width="2.6" stroke-linecap="round"/>
+</svg>
