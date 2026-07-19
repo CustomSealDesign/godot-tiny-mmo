@@ -6,13 +6,13 @@
 
 [sub_resource type="Resource" id="Resource_lw3op"]
 script = ExtResource("2_n1fd0")
-lines = Array[String](["Your salvation is your redemption.", "Your craft is death.", "Your pledge is eternal service.", "Until humanity win."])
+lines = Array[String](["Your salvation is your redemption.", "Your craft is death.", "Your pledge is eternal service.", "Until the demons are purged."])
 label_override = "Tell my pledge"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [resource]
 script = ExtResource("3_llnij")
 npc_name = "Registry Elder"
-greeting = "Up already? Good... hold still. …Number's assigned. Your name's your own business; the Charter doesn't need it. You're a Hero now: you work the frontier till the war's won, and then you're free. Stairs are behind you. Mind the step."
+greeting = "Up already? Good... hold still. …Number's assigned. Your name's your own business; the Registry doesn't need it. You're an outer disciple now: you work the frontier till the demons are purged, and then you're free. Stairs are behind you. Mind the step."
 interactions = Array[ExtResource("1_tf42x")]([SubResource("Resource_lw3op")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

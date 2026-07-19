@@ -10,7 +10,7 @@
 
 [sub_resource type="Resource" id="Resource_8au6g"]
 script = ExtResource("2_sy65p")
-lines = Array[String](["I got lost here after a expedition with my guild mates.", "After walking too much between these mines we got lost.", "I don't even remember when this happened.", "Just hope they're all fine.", "I've see lot of skeletons around here.", "If you going futher these caves", "Consider buying some of my health potions."])
+lines = Array[String](["I got lost here after an expedition with my sect brothers.", "After walking too much between these mines we got lost.", "I don't even remember when this happened.", "Just hope they're all fine.", "I've seen a lot of corpse puppets around here.", "If you're going further into these caves,", "Consider buying some of my healing pills."])
 label_override = "Talk"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
@@ -30,6 +30,6 @@ label_override = "Exit Dungeon"
 script = ExtResource("5_3pw6e")
 npc_name = "Wandering Spirit"
 skin = ExtResource("6_t1jho")
-greeting = "OH! Wow a adventurer. How could i help you buddy?"
+greeting = "OH! Wow, a cultivator. How could I help you, friend?"
 interactions = Array[ExtResource("1_iita0")]([SubResource("Resource_8au6g"), SubResource("Resource_sqgvj"), SubResource("Resource_63gk8")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

@@ -15,7 +15,7 @@ metadata/_custom_type_script = "uid://dka1daj2vrhn"
 
 [sub_resource type="Resource" id="Resource_gf85t"]
 script = ExtResource("10_dc8vo")
-lines = Array[String](["I kept a gate once. Then a wall. Then this hall. Outlived all three.", "They make the Heroes down in the cells, and up here we put them to work. Don't think on it too hard.", "What you were before? The Charter knows. It isn't telling, and neither am I. I just hand out the work."])
+lines = Array[String](["I kept a gate once. Then a wall. Then this hall. Outlived all three.", "They forge the disciples down in the cells, and up here we put them to work. Don't think on it too hard.", "What you were before? The Registry knows. It isn't telling, and neither am I. I just hand out the work."])
 label_override = "Tell me about yourself"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

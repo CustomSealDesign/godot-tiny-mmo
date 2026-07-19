@@ -14,7 +14,7 @@ metadata/_custom_type_script = "uid://bpo804060rk5t"
 
 [sub_resource type="Resource" id="Resource_cn5qi"]
 script = ExtResource("4_kq45a")
-lines = Array[String](["I sell to anyone with coin and a pulse. You've got the one, at least."])
+lines = Array[String](["I sell to anyone with spirit stones and a pulse. You've got the one, at least."])
 label_override = "Talk about yourself"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
@@ -22,6 +22,6 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 script = ExtResource("4_gnyxw")
 npc_name = "Sect Merchant"
 skin = ExtResource("6_cn5qi")
-greeting = "You're new-lit, so I'll keep it plain: this lot keeps you alive past the gate, that lot doesn't. Coin first, questions never."
+greeting = "You're new-lit, so I'll keep it plain: this lot keeps you alive past the gate, that lot doesn't. Spirit stones first, questions never."
 interactions = Array[ExtResource("1_nmd86")]([SubResource("Resource_udfpp"), SubResource("Resource_cn5qi")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

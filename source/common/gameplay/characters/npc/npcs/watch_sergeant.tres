@@ -18,12 +18,12 @@ quests = Array[ExtResource("5_questres")]([ExtResource("6_q1"), ExtResource("7_q
 
 [sub_resource type="Resource" id="Dialogue_camp"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Deserters, charter dodgers, vein thieves. Call them what you want, they all swing the same.", "The watch cannot go in. Too few of us, too many of them. You are not the watch, so nobody sent you. Understood?", "Their sorcerers keep the big ones standing. Learn that lesson cheap, from me, not out there."])
+lines = Array[String](["Deserters, registry dodgers, vein thieves. Call them what you want, they all swing the same.", "The watch cannot go in. Too few of us, too many of them. You are not the watch, so nobody sent you. Understood?", "Their talisman masters keep the big ones standing. Learn that lesson cheap, from me, not out there."])
 label_override = "Ask about the camp"
 
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Sect Guard Captain"
 skin = ExtResource("11_skin")
-greeting = "Hold. This is as far as the road is safe. Past those stakes it is all bandit ground. If you are here to fight, the watch pays for outlaw work. If not, turn around."
+greeting = "Hold. This is as far as the road is safe. Past those stakes it is all rogue cultivator ground. If you are here to fight, the watch pays for outlaw work. If not, turn around."
 interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_sergeant"), SubResource("Dialogue_camp")])

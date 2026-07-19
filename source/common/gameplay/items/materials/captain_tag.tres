@@ -7,7 +7,7 @@
 script = ExtResource("2_script")
 item_name = &"Rogue Sect Token"
 item_icon = ExtResource("1_icon")
-description = "A bronze tag the bandit captain wore as proof of rank. The city watch will want to see this."
+description = "A bronze tag the rogue sect captain wore as proof of rank. The city watch will want to see this."
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"captain_tag"
 metadata/id = 57
