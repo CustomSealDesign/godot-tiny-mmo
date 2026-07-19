@@ -854,7 +854,7 @@ func fill_connection_info(_account_name: String, _account_id: int) -> void:
 func _refresh_connection_info() -> void:
 	var status: String = tr("STATUS_ONLINE") if _server_online else tr("STATUS_OFFLINE")
 	var who: String = account_name if not account_name.is_empty() else tr("NOT_LOGGED_IN")
-	var game: String = str(ProjectSettings.get_setting("application/config/name", "Ekonia"))
+	var game: String = str(ProjectSettings.get_setting("application/config/name", "Immortal Ascension"))
 	$ConnectionInfo.text = "%s · %s\n%s %s %s" % [
 		status, who, game, GatewayAPI.game_version(), BUILD_STAGE
 	]
