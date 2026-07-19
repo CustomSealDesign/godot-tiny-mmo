@@ -290,9 +290,9 @@ func _on_mining_result(data: Dictionary) -> void:
 	var lines: PackedStringArray = PackedStringArray()
 	var mining_xp: int = int(data.get("mining_xp_gained", 0))
 	if mining_xp > 0:
-		lines.append("+%d Mining XP" % mining_xp)
+		lines.append("+%d Spirit Mining XP" % mining_xp)
 		if bool(data.get("mining_leveled_up", false)):
-			lines.append("Mining Level %d!" % int(data.get("mining_level", 1)))
+			lines.append("Spirit Mining Level %d!" % int(data.get("mining_level", 1)))
 	var item_name: String = str(data.get("item_name", ""))
 	if not item_name.is_empty():
 		lines.append("+1 %s" % item_name)
@@ -309,10 +309,13 @@ func _on_forging_result(data: Dictionary) -> void:
 	if not bool(data.get("ok", false)):
 		return
 	var lines: PackedStringArray = PackedStringArray()
-	lines.append("+%d %s XP" % [int(data.get("xp_gained", 0)), str(data.get("skill", "Forging"))])
+	var skill_label: String = str(data.get("skill", "Forging"))
+	if skill_label == "Forging":
+		skill_label = "Spirit Forging"
+	lines.append("+%d %s XP" % [int(data.get("xp_gained", 0)), skill_label])
 	if bool(data.get("leveled_up", false)):
-		lines.append("%s Level %d!" % [str(data.get("skill", "Forging")), int(data.get("level", 1))])
-	Toaster.toast_group("Forging", lines)
+		lines.append("%s Level %d!" % [skill_label, int(data.get("level", 1))])
+	Toaster.toast_group(skill_label, lines)
 
 
 func _on_forging_error(data: Dictionary) -> void:

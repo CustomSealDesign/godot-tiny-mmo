@@ -8,12 +8,12 @@ const SKILL_LABELS: Dictionary = {
 	"Spirit_Gathering": "Spirit Gathering",
 	"Alchemy": "Alchemy",
 	"Combat": "Combat",
-	"Mining": "Mining",
-	"Forging": "Forging",
-	"Attack": "Attack",
-	"Strength": "Strength",
-	"Defense": "Defense",
-	"Hitpoints": "Hitpoints",
+	"Mining": "Spirit Mining",
+	"Forging": "Spirit Forging",
+	"Attack": "Sword Arts",
+	"Strength": "Body Cultivation",
+	"Defense": "Iron Body",
+	"Hitpoints": "Vitality",
 }
 
 const SKILL_ICONS: Dictionary = {

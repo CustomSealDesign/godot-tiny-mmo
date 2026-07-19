@@ -4,9 +4,9 @@ extends VBoxContainer
 
 
 const STANCES: Array[Dictionary] = [
-	{"id": "accurate", "label": "Accurate", "skill": "Attack"},
-	{"id": "aggressive", "label": "Aggressive", "skill": "Strength"},
-	{"id": "defensive", "label": "Defensive", "skill": "Defense"},
+	{"id": "accurate", "label": "Accurate", "skill": "Sword Arts"},
+	{"id": "aggressive", "label": "Aggressive", "skill": "Body Cultivation"},
+	{"id": "defensive", "label": "Defensive", "skill": "Iron Body"},
 ]
 
 @onready var _stance_row: HBoxContainer = %StanceRow

@@ -54,7 +54,7 @@ static func start(peer_id: int, player: Player, vein: SpiritVein, instance: Serv
 	if mining_level < vein.required_level:
 		_push_system_message(
 			peer_id,
-			"You need a Mining level of %d to mine this." % vein.required_level
+			"You need a Spirit Mining level of %d to mine this." % vein.required_level
 		)
 		return {"ok": false, "reason": "level", "required_level": vein.required_level}
 

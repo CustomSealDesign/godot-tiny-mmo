@@ -60,7 +60,7 @@ static func start(
 	if forging_level < required_level:
 		_push_system_message(
 			peer_id,
-			"You need a Forging level of %d to craft this." % required_level
+			"You need a Spirit Forging level of %d to craft this." % required_level
 		)
 		return {"ok": false, "reason": "level", "required_level": required_level}
 
