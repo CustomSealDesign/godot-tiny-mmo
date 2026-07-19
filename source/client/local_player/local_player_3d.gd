@@ -149,7 +149,9 @@ func move_to_plane(destination_plane: Vector2, interact_target: Node = null) -> 
 	_stop_grid_movement()
 
 	var snapped_destination: Vector2 = GridMovement.snap_plane(destination_plane)
+	_ft("X_findpath_start")
 	_current_path = pathfinder.find_path(global_position, snapped_destination)
+	_ft("X_findpath_done")
 	if _current_path.is_empty():
 		movement_finished.emit()
 		return
@@ -189,12 +191,32 @@ func _finish_grid_movement() -> void:
 		interact_target.on_player_arrived()
 
 
+## TEMPORARY freeze locator. Writes the currently-executing step to a file every frame;
+## when the client hangs, the file's last value is exactly where it froze. Remove once
+## the freeze is diagnosed. Toggle off with _FREEZE_TRACE = false.
+const _FREEZE_TRACE: bool = true
+var _ft_n: int = 0
+var _ft_file: FileAccess = null
+
+func _ft(phase: String) -> void:
+	if not _FREEZE_TRACE:
+		return
+	if _ft_file == null:
+		_ft_file = FileAccess.open("user://freeze_trace.txt", FileAccess.WRITE)
+	if _ft_file != null:
+		_ft_file.seek(0)
+		_ft_file.store_string("n=%d phase=%s ticks=%d          " % [_ft_n, phase, Time.get_ticks_msec()])
+		_ft_file.flush()
+
+
 func _physics_process(delta: float) -> void:
-	process_movement(delta)
-	process_input()
-	process_animation(delta)
-	process_synchronization()
-	_notify_zone_transition()
+	_ft_n += 1
+	_ft("A_movement_start"); process_movement(delta)
+	_ft("B_input"); process_input()
+	_ft("C_animation"); process_animation(delta)
+	_ft("D_sync"); process_synchronization()
+	_ft("E_zone"); _notify_zone_transition()
+	_ft("F_frame_done")
 
 
 func _process(delta: float) -> void:
