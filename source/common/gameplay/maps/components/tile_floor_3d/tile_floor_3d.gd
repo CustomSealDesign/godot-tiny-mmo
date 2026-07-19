@@ -209,9 +209,13 @@ func _build_props(parent: Node3D, props: Array) -> void:
 		parent.add_child(sprite)
 
 
-## One StaticBody3D (physics layer 1) whose collision is a ConcavePolygonShape3D made
-## of the walkable cells only. A single trimesh handles arbitrary walkable shapes with
-## holes (under trees/walls) and is cheap to raycast (BVH-accelerated).
+## One StaticBody3D (physics layer 1) covering the walkable cells with thin SOLID box
+## slabs. Solid boxes — not a flat trimesh — because a zero-thickness ConcavePolygonShape3D
+## is NOT reliably hit by the downward raycasts the pathfinder / floor-snap depend on
+## (coplanar faces get missed), which silently breaks movement. Cells are greedy-merged
+## into maximal rectangles first, so a big open field is a handful of boxes, not thousands.
+const _FLOOR_SLAB_THICKNESS: float = 0.5
+
 func _build_walkable_collider(parent: Node3D, floor_cells: Dictionary, blocked_cells: Dictionary, layers: Array[TileMapLayer]) -> void:
 	if layers.is_empty():
 		return
@@ -220,34 +224,60 @@ func _build_walkable_collider(parent: Node3D, floor_cells: Dictionary, blocked_c
 	var hx: float = float(tile_px.x) * 0.5
 	var hz: float = float(tile_px.y) * 0.5
 
-	var faces: PackedVector3Array = PackedVector3Array()
+	# walkable = floor minus blocked (tree/wall) cells.
+	var walkable: Dictionary = {}
 	for cell: Vector2i in floor_cells:
-		if blocked_cells.has(cell):
-			continue
-		var plane_center: Vector2 = ref_layer.to_global(ref_layer.map_to_local(cell))
-		var c: Vector3 = PlaneCoords3D.plane_to_world(plane_center, floor_y)
-		var nw := Vector3(c.x - hx, floor_y, c.z - hz)
-		var ne := Vector3(c.x + hx, floor_y, c.z - hz)
-		var se := Vector3(c.x + hx, floor_y, c.z + hz)
-		var sw := Vector3(c.x - hx, floor_y, c.z + hz)
-		# Two triangles, wound so the surface normal points +Y (up) for down-rays.
-		faces.append_array([nw, se, ne])
-		faces.append_array([nw, sw, se])
-
-	if faces.is_empty():
+		if not blocked_cells.has(cell):
+			walkable[cell] = true
+	if walkable.is_empty():
 		return
-
-	var shape := ConcavePolygonShape3D.new()
-	shape.set_faces(faces)
 
 	var body := StaticBody3D.new()
 	body.name = &"WalkableFloor"
 	body.collision_layer = 1
 	body.collision_mask = 0
-	var col := CollisionShape3D.new()
-	col.shape = shape
-	body.add_child(col)
 	parent.add_child(body)
+
+	# Greedy rectangle meshing over the walkable cell set.
+	var visited: Dictionary = {}
+	for cell: Vector2i in walkable:
+		if visited.has(cell):
+			continue
+		# Extend right along the row.
+		var x1: int = cell.x
+		while walkable.has(Vector2i(x1 + 1, cell.y)) and not visited.has(Vector2i(x1 + 1, cell.y)):
+			x1 += 1
+		# Extend down while whole rows [cell.x..x1] are free.
+		var y1: int = cell.y
+		var growing: bool = true
+		while growing:
+			var ny: int = y1 + 1
+			for xx: int in range(cell.x, x1 + 1):
+				var probe: Vector2i = Vector2i(xx, ny)
+				if not walkable.has(probe) or visited.has(probe):
+					growing = false
+					break
+			if growing:
+				y1 = ny
+		for yy: int in range(cell.y, y1 + 1):
+			for xx: int in range(cell.x, x1 + 1):
+				visited[Vector2i(xx, yy)] = true
+
+		# World AABB of the rectangle from its corner cell centers.
+		var c0: Vector3 = PlaneCoords3D.plane_to_world(ref_layer.to_global(ref_layer.map_to_local(Vector2i(cell.x, cell.y))), floor_y)
+		var c1: Vector3 = PlaneCoords3D.plane_to_world(ref_layer.to_global(ref_layer.map_to_local(Vector2i(x1, y1))), floor_y)
+		var min_x: float = minf(c0.x, c1.x) - hx
+		var max_x: float = maxf(c0.x, c1.x) + hx
+		var min_z: float = minf(c0.z, c1.z) - hz
+		var max_z: float = maxf(c0.z, c1.z) + hz
+
+		var box := BoxShape3D.new()
+		box.size = Vector3(max_x - min_x, _FLOOR_SLAB_THICKNESS, max_z - min_z)
+		var col := CollisionShape3D.new()
+		col.shape = box
+		# Slab top flush with the floor plane; extends downward by the thickness.
+		col.position = Vector3((min_x + max_x) * 0.5, floor_y - _FLOOR_SLAB_THICKNESS * 0.5, (min_z + max_z) * 0.5)
+		body.add_child(col)
 
 
 func _pixel_material(texture: Texture2D) -> StandardMaterial3D:
