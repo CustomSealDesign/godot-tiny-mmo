@@ -197,6 +197,8 @@ func _finish_grid_movement() -> void:
 const _FREEZE_TRACE: bool = true
 var _ft_n: int = 0
 var _ft_file: FileAccess = null
+var _ft_last_drawn: int = 0
+var _ft_render_stuck: int = 0
 
 func _ft(phase: String) -> void:
 	if not _FREEZE_TRACE:
@@ -205,12 +207,22 @@ func _ft(phase: String) -> void:
 		_ft_file = FileAccess.open("user://freeze_trace.txt", FileAccess.WRITE)
 	if _ft_file != null:
 		_ft_file.seek(0)
-		_ft_file.store_string("n=%d phase=%s ticks=%d          " % [_ft_n, phase, Time.get_ticks_msec()])
+		# render_stuck = physics frames elapsed since the last time a NEW frame was drawn.
+		# If this climbs into the hundreds while n keeps rising, rendering has stalled while
+		# game logic runs = a GPU/present freeze (not a code hang).
+		_ft_file.store_string("n=%d phase=%s drawn=%d render_stuck=%d fps=%d ticks=%d          " % [
+			_ft_n, phase, _ft_last_drawn, _ft_render_stuck, int(Engine.get_frames_per_second()), Time.get_ticks_msec()])
 		_ft_file.flush()
 
 
 func _physics_process(delta: float) -> void:
 	_ft_n += 1
+	var drawn_now: int = Engine.get_frames_drawn()
+	if drawn_now == _ft_last_drawn:
+		_ft_render_stuck += 1
+	else:
+		_ft_render_stuck = 0
+		_ft_last_drawn = drawn_now
 	_ft("A_movement_start"); process_movement(delta)
 	_ft("B_input"); process_input()
 	_ft("C_animation"); process_animation(delta)
