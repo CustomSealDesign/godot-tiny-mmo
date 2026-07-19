@@ -192,46 +192,16 @@ func _finish_grid_movement() -> void:
 		interact_target.on_player_arrived()
 
 
-## TEMPORARY freeze locator. Writes the currently-executing step to a file every frame;
-## when the client hangs, the file's last value is exactly where it froze. Remove once
-## the freeze is diagnosed. Toggle off with _FREEZE_TRACE = false.
-const _FREEZE_TRACE: bool = true
-var _ft_n: int = 0
-var _ft_file: FileAccess = null
-var _ft_last_drawn: int = 0
-var _ft_render_stuck: int = 0
-var _ft_nan: String = "ok"
+## Last finite plane position; used to recover if the body position ever goes non-finite.
 var _last_good_plane: Vector2 = Vector2.ZERO
-
-func _ft(phase: String) -> void:
-	if not _FREEZE_TRACE:
-		return
-	if _ft_file == null:
-		_ft_file = FileAccess.open("user://freeze_trace.txt", FileAccess.WRITE)
-	if _ft_file != null:
-		_ft_file.seek(0)
-		# render_stuck = physics frames elapsed since the last time a NEW frame was drawn.
-		# If this climbs into the hundreds while n keeps rising, rendering has stalled while
-		# game logic runs = a GPU/present freeze (not a code hang).
-		_ft_file.store_string("n=%d phase=%s drawn=%d render_stuck=%d fps=%d nan=%s ticks=%d          " % [
-			_ft_n, phase, _ft_last_drawn, _ft_render_stuck, int(Engine.get_frames_per_second()), _ft_nan, Time.get_ticks_msec()])
-		_ft_file.flush()
 
 
 func _physics_process(delta: float) -> void:
-	_ft_n += 1
-	var drawn_now: int = Engine.get_frames_drawn()
-	if drawn_now == _ft_last_drawn:
-		_ft_render_stuck += 1
-	else:
-		_ft_render_stuck = 0
-		_ft_last_drawn = drawn_now
-	_ft("A_movement_start"); process_movement(delta)
-	_ft("B_input"); process_input()
-	_ft("C_animation"); process_animation(delta)
-	_ft("D_sync"); process_synchronization()
-	_ft("E_zone"); _notify_zone_transition()
-	_ft("F_frame_done")
+	process_movement(delta)
+	process_input()
+	process_animation(delta)
+	process_synchronization()
+	_notify_zone_transition()
 
 
 func _process(delta: float) -> void:
@@ -289,7 +259,6 @@ func process_movement(delta: float) -> void:
 	# Self-heal: if the body position ever goes non-finite, recover to the last good tile
 	# instead of letting NaN propagate into the camera (garbled view) and wire sync.
 	if not body.global_position.is_finite():
-		_ft_nan = "BODY_NAN@%d" % _ft_n
 		global_position = _last_good_plane
 		_stop_grid_movement()
 		_sync_body_from_plane()
