@@ -78,6 +78,7 @@ func _ready() -> void:
 	camera_3d.setup(self, pathfinder)
 
 	global_position = GridMovement.snap_plane(global_position)
+	_last_good_plane = global_position
 	_sync_body_from_plane()
 
 	_apply_settings()
@@ -199,6 +200,8 @@ var _ft_n: int = 0
 var _ft_file: FileAccess = null
 var _ft_last_drawn: int = 0
 var _ft_render_stuck: int = 0
+var _ft_nan: String = "ok"
+var _last_good_plane: Vector2 = Vector2.ZERO
 
 func _ft(phase: String) -> void:
 	if not _FREEZE_TRACE:
@@ -210,8 +213,8 @@ func _ft(phase: String) -> void:
 		# render_stuck = physics frames elapsed since the last time a NEW frame was drawn.
 		# If this climbs into the hundreds while n keeps rising, rendering has stalled while
 		# game logic runs = a GPU/present freeze (not a code hang).
-		_ft_file.store_string("n=%d phase=%s drawn=%d render_stuck=%d fps=%d ticks=%d          " % [
-			_ft_n, phase, _ft_last_drawn, _ft_render_stuck, int(Engine.get_frames_per_second()), Time.get_ticks_msec()])
+		_ft_file.store_string("n=%d phase=%s drawn=%d render_stuck=%d fps=%d nan=%s ticks=%d          " % [
+			_ft_n, phase, _ft_last_drawn, _ft_render_stuck, int(Engine.get_frames_per_second()), _ft_nan, Time.get_ticks_msec()])
 		_ft_file.flush()
 
 
@@ -255,7 +258,9 @@ func process_movement(delta: float) -> void:
 		return
 
 	var move_speed: float = stats_component.get_stat(Stat.MOVE_SPEED)
-	if move_speed <= 0.0:
+	# NaN-safe: `NaN <= 0.0` is false, so a NaN stat would slip through and poison
+	# body.velocity -> a NaN body position -> a garbled 3D view + broken click-to-move.
+	if not (move_speed > 0.0):
 		move_speed = speed
 	if _channeling and _channel_mobile:
 		move_speed *= _channel_speed_mult
@@ -275,7 +280,17 @@ func process_movement(delta: float) -> void:
 	var direction_world: Vector3 = PlaneCoords3D.plane_to_world(direction_plane.normalized(), 0.0)
 	body.velocity = direction_world * move_speed
 	body.move_and_slide()
+	# Self-heal: if the body position ever goes non-finite, recover to the last good tile
+	# instead of letting NaN propagate into the camera (garbled view) and wire sync.
+	if not body.global_position.is_finite():
+		_ft_nan = "BODY_NAN@%d" % _ft_n
+		global_position = _last_good_plane
+		_stop_grid_movement()
+		_sync_body_from_plane()
+		return
 	global_position = PlaneCoords3D.world_to_plane(body.global_position)
+	if global_position.is_finite():
+		_last_good_plane = global_position
 	input_direction = direction_plane.normalized()
 
 	if body.global_position.distance_to(

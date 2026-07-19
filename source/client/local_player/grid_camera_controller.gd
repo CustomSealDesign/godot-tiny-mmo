@@ -26,6 +26,7 @@ var current_position: Vector3 = Vector3.ZERO
 ## Per-map focus clamp in WORLD space (plane left/right -> world X, top/bottom -> world Z).
 ## The camera frames this clamped point instead of the raw player position, so it never
 ## pans past the map edge into black. Defaults to effectively unbounded.
+var _nan_warned: bool = false
 var _limits_enabled: bool = false
 var _limit_min: Vector2 = Vector2(-1e12, -1e12)  # (world x, world z)
 var _limit_max: Vector2 = Vector2(1e12, 1e12)
@@ -105,6 +106,14 @@ func position_camera(force: bool = false, delta: float = 0.0) -> void:
 	if player == null or player.body == null:
 		return
 	var focus: Vector3 = _focus_point()
+	# HARD GUARD: a single non-finite focus (from a bad body position) fed into look_at
+	# produces a NaN camera basis that smears the whole 3D view ("garbled") and breaks
+	# click-to-move raycasts — and it never self-heals. Refuse bad input instead.
+	if not focus.is_finite():
+		if not _nan_warned:
+			_nan_warned = true
+			push_error("GridCameraController: non-finite focus %s — skipping camera update" % focus)
+		return
 	var offset := Vector3(
 		cos(angle) * distance,
 		height,
@@ -114,9 +123,15 @@ func position_camera(force: bool = false, delta: float = 0.0) -> void:
 	if force:
 		current_position = target_pos
 	else:
-		current_position = current_position.lerp(target_pos, delta * follow_smoothness)
+		# Clamp the lerp weight: a huge delta (frame hitch) would otherwise overshoot.
+		current_position = current_position.lerp(target_pos, clampf(delta * follow_smoothness, 0.0, 1.0))
+	if not current_position.is_finite():
+		current_position = target_pos
 	global_position = current_position
-	look_at(focus, Vector3.UP)
+	# look_at needs a non-zero, non-vertical direction to focus, else the basis is NaN.
+	var to_focus: Vector3 = focus - global_position
+	if to_focus.length() > 0.001 and absf(to_focus.normalized().dot(Vector3.UP)) < 0.999:
+		look_at(focus, Vector3.UP)
 
 
 func _handle_mouse_click(mouse_pos: Vector2) -> void:
