@@ -610,11 +610,24 @@ func set_camera_zoom(zoom: float) -> void:
 
 
 func _on_instance_changed_camera_limits(_instance: InstanceClient) -> void:
-	pass
+	if InstanceClient.current != null:
+		_apply_camera_limits(InstanceClient.current.instance_map)
 
 
-func _apply_camera_limits(_map: Map) -> void:
-	pass
+## Feed the map's plane-space camera limits into the 3D orbit camera so it stops at the
+## map edge (the Camera2D limit_* analog). The Map defaults are ±10,000,000 (unbounded).
+func _apply_camera_limits(map: Map) -> void:
+	if camera_3d == null:
+		return
+	if map == null:
+		camera_3d.clear_plane_limits()
+		return
+	camera_3d.set_plane_limits(
+		float(map.camera_limit_left),
+		float(map.camera_limit_top),
+		float(map.camera_limit_right),
+		float(map.camera_limit_bottom)
+	)
 
 
 func set_input_active(active: bool) -> void:

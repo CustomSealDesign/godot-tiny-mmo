@@ -67,6 +67,7 @@ func _ready() -> void:
 	if multiplayer.is_server():
 		return
 
+	PixelScale3D.apply_billboard(_sprite_billboard)
 	_click_area.clicked.connect(_on_clicked)
 	_click_area.mouse_entered.connect(_set_interactable_hover.bind(true))
 	_click_area.mouse_exited.connect(_set_interactable_hover.bind(false))
@@ -97,6 +98,17 @@ func _process(delta: float) -> void:
 	if multiplayer.is_server():
 		return
 	_advance_sprite_animation(delta)
+	_update_overhead_ui()
+
+
+## Keep the 2D health bar + name label pinned over the 3D billboard each frame.
+func _update_overhead_ui() -> void:
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera == null or _visual_root == null:
+		return
+	var anchor: Vector3 = OverheadUi3D.head_anchor(_visual_root.global_position, _sprite_billboard)
+	OverheadUi3D.place(_health_bar, camera, anchor)
+	OverheadUi3D.place(_name_label, camera, anchor, Vector2(0.0, -14.0))
 
 
 func get_attack_damage() -> int:

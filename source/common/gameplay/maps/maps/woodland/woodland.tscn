@@ -23,17 +23,7 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/sect_vault/SectVault.tscn" id="19b_vault"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/characters/enemy/Enemy.tscn" id="20_enemy"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/characters/npc/NPC_Elder.tscn" id="21_elder"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_walkable_floor"]
-size = Vector3(2048, 0.5, 2048)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-shading_mode = 0
-albedo_color = Color(0.216, 0.353, 0.235, 1)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
-material = SubResource("StandardMaterial3D_ground")
-size = Vector2(2048, 2048)
+[ext_resource type="Script" path="res://source/common/gameplay/maps/components/tile_floor_3d/tile_floor_3d.gd" id="22_tilefloor"]
 
 [node name="Woodland" type="Node2D" unique_id=1936915393 node_paths=PackedStringArray("replicated_props_container")]
 script = ExtResource("1_i1aj4")
@@ -207,13 +197,5 @@ position = Vector2(128, -64)
 [node name="NPC_Elder" parent="." instance=ExtResource("21_elder")]
 position = Vector2(128, -192)
 
-[node name="WalkableFloor" type="StaticBody3D" parent="."]
-collision_layer = 1
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="WalkableFloor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
-shape = SubResource("BoxShape3D_walkable_floor")
-
-[node name="GroundMesh" type="MeshInstance3D" parent="WalkableFloor"]
-mesh = SubResource("PlaneMesh_ground")
+[node name="TileFloor3D" type="Node3D" parent="."]
+script = ExtResource("22_tilefloor")

@@ -4,7 +4,7 @@ extends Camera3D
 ## Reference_GodotGrid/camera_controller.gd.
 
 
-const BASE_CAMERA_SIZE: float = 384.0  # ~12 tiles @ 32 px/tile; the world plane is authored in pixels
+const BASE_CAMERA_SIZE: float = PixelScale3D.CAMERA_ORTHO_SIZE  # ~12 tiles; world plane authored in pixels
 
 @export var distance: float = 240.0
 @export var height: float = 320.0
@@ -22,6 +22,13 @@ var tile_indicator_scene: PackedScene = preload("res://source/client/local_playe
 var tile_indicator: TileIndicator = null
 var angle: float = 0.0
 var current_position: Vector3 = Vector3.ZERO
+
+## Per-map focus clamp in WORLD space (plane left/right -> world X, top/bottom -> world Z).
+## The camera frames this clamped point instead of the raw player position, so it never
+## pans past the map edge into black. Defaults to effectively unbounded.
+var _limits_enabled: bool = false
+var _limit_min: Vector2 = Vector2(-1e12, -1e12)  # (world x, world z)
+var _limit_max: Vector2 = Vector2(1e12, 1e12)
 
 
 func setup(local_player: LocalPlayer, grid_pathfinder: GridPathfinder) -> void:
@@ -62,21 +69,54 @@ func _unhandled_input(event: InputEvent) -> void:
 			_handle_mouse_click(event.position)
 
 
+## Set the per-map camera focus limits from a [Map]'s plane-space camera_limit_* edges.
+## left/right map to world X, top/bottom to world Z. The sentinel ±10,000,000 defaults
+## (unbounded) simply produce a clamp wide enough to never engage.
+func set_plane_limits(left: float, top: float, right: float, bottom: float) -> void:
+	_limit_min = Vector2(minf(left, right), minf(top, bottom))
+	_limit_max = Vector2(maxf(left, right), maxf(top, bottom))
+	_limits_enabled = true
+
+
+func clear_plane_limits() -> void:
+	_limits_enabled = false
+
+
+## The point the camera frames: the player, clamped into the map bounds inset by the
+## view half-extent so the visible area stops at the map edge. When an axis is narrower
+## than the view, the map is centered on that axis.
+func _focus_point() -> Vector3:
+	var focus: Vector3 = player.body.global_position
+	if not _limits_enabled:
+		return focus
+	var half: float = size * 0.5  # orthographic half-height in world units
+	focus.x = _clamp_axis(focus.x, _limit_min.x, _limit_max.x, half)
+	focus.z = _clamp_axis(focus.z, _limit_min.y, _limit_max.y, half)
+	return focus
+
+
+func _clamp_axis(value: float, lo: float, hi: float, margin: float) -> float:
+	if hi - lo <= margin * 2.0:
+		return (lo + hi) * 0.5
+	return clampf(value, lo + margin, hi - margin)
+
+
 func position_camera(force: bool = false, delta: float = 0.0) -> void:
 	if player == null or player.body == null:
 		return
+	var focus: Vector3 = _focus_point()
 	var offset := Vector3(
 		cos(angle) * distance,
 		height,
 		sin(angle) * distance
 	)
-	var target_pos: Vector3 = player.body.global_position + offset
+	var target_pos: Vector3 = focus + offset
 	if force:
 		current_position = target_pos
 	else:
 		current_position = current_position.lerp(target_pos, delta * follow_smoothness)
 	global_position = current_position
-	look_at(player.body.global_position, Vector3.UP)
+	look_at(focus, Vector3.UP)
 
 
 func _handle_mouse_click(mouse_pos: Vector2) -> void:

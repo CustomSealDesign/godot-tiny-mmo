@@ -84,6 +84,7 @@ var _walk_sprite_frame: int = WALK_SPRITE_FRAME_FIRST
 func _ready() -> void:
 	if multiplayer.is_server():
 		return
+	PixelScale3D.apply_billboard(sprite_billboard)
 	_on_stat_changed(Stat.HEALTH, stats_component.get_stat(Stat.HEALTH))
 	_on_stat_changed(Stat.HEALTH_MAX, stats_component.get_stat(Stat.HEALTH_MAX))
 	stats_component.stats.stat_changed.connect(_on_stat_changed)
@@ -102,6 +103,17 @@ func _process(delta: float) -> void:
 	if multiplayer.is_server():
 		return
 	_advance_sprite_animation(delta)
+	_update_overhead_ui()
+
+
+## Keep the 2D health bar + name label pinned over the 3D billboard each frame.
+func _update_overhead_ui() -> void:
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera == null or body == null:
+		return
+	var anchor: Vector3 = OverheadUi3D.head_anchor(body.global_position, sprite_billboard)
+	OverheadUi3D.place(progress_bar, camera, anchor)
+	OverheadUi3D.place(display_name_label, camera, anchor, Vector2(0.0, -14.0))
 
 
 func wants_net_smoothing() -> bool:
