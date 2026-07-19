@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_38lmc")
-item_name = &"Bone"
+item_name = &"Spirit Bone"
 item_icon = ExtResource("1_t2ilm")
 description = "A sturdy bone, picked clean. The Bonecarver pays for spares."
 metadata/_custom_type_script = "uid://nsr1timk430j"

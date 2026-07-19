@@ -243,7 +243,7 @@ npc_resource = ExtResource("25_sergeant")
 [node name="Portal" parent="." unique_id=375786523 instance=ExtResource("14_27tev")]
 position = Vector2(528, 728)
 portal_color = Color(0.4117476, 0.0003790778, 0.48652047, 1)
-destination_label = "Castle Garden"
+destination_label = "Sect Courtyard"
 target_instance = ExtResource("15_nga3o")
 warper_id = 22
 target_id = 22

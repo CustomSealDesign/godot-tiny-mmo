@@ -17,11 +17,11 @@ required_amount = 8
 
 [resource]
 script = ExtResource("2_quest")
-quest_name = "Break the Myconid Line"
-description = "Break the myconid line past the grove. The big ones leap, keep your feet moving."
+quest_name = "Break the Spore Line"
+description = "Break the spore fiend line past the grove. The big ones leap, keep your feet moving."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_brute"), SubResource("Obj_kill_swarm")])
 min_level = 7
-unlock_message = "[Forager Maela] You handle yourself well down here. The myconids hold the deep passage, come see me."
+unlock_message = "[Forager Maela] You handle yourself well down here. The spore fiends hold the deep passage, come see me."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_q2")])
 reward_xp = 260
 reward_gold = 10

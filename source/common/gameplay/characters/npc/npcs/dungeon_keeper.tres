@@ -20,7 +20,7 @@ metadata/_custom_type_script = "uid://b36k3ordtiw1u"
 
 [resource]
 script = ExtResource("4_cjldb")
-npc_name = "DungeonKeeper"
+npc_name = "Trial Warden"
 skin = ExtResource("6_0ftqf")
 greeting = "Feel that cold coming up the steps? That's a deep pocket. The dark gets [i]thick[/i] down there, and it doesn't die easy. Take a group, or take the long way home. I just keep the door."
 interactions = Array[ExtResource("1_i3jo1")]([SubResource("Resource_0ftqf"), SubResource("Resource_5aef6")])

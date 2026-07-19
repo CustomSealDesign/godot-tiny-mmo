@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("2_m8hih")
-item_name = &"gold"
+item_name = &"Spirit Coins"
 item_icon = ExtResource("1_1byyn")
 is_currency = true
 metadata/_custom_type_script = "uid://bkat7yo0vssli"

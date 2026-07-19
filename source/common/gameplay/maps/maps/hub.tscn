@@ -605,7 +605,7 @@ target_id = 2
 [node name="DarkForestPortal" parent="Warpers" unique_id=375786523 instance=ExtResource("29_2sqao")]
 position = Vector2(992, -112)
 portal_color = Color(0, 0.33908218, 0.29476115, 1)
-destination_label = "DimWood (Dark Forest)"
+destination_label = "Shadowmist Forest"
 target_instance = ExtResource("30_og50n")
 warper_id = 20
 target_id = 20
@@ -614,7 +614,7 @@ required_level = 20
 [node name="BanditHideoutPortal" parent="Warpers" unique_id=706210769 instance=ExtResource("29_2sqao")]
 position = Vector2(856, 16)
 portal_color = Color(0.4117476, 0.0003790778, 0.48652047, 1)
-destination_label = "Bandit Hideout"
+destination_label = "Rogue Cultivator Camp"
 target_instance = ExtResource("46_l3yo4")
 warper_id = 22
 target_id = 22
@@ -623,13 +623,13 @@ required_level = 10
 [node name="TheHollowPortal" parent="Warpers" unique_id=2072488891 instance=ExtResource("29_2sqao")]
 position = Vector2(992, 80)
 portal_color = Color(0.11549731, 0.1297065, 0.12632617, 1)
-destination_label = "The Hollow"
+destination_label = "Spirit Hollow"
 required_level = 35
 
 [node name="WoodlandPortal" parent="Warpers" unique_id=686472752 instance=ExtResource("29_2sqao")]
 position = Vector2(856, -112)
 portal_color = Color(0.3670073, 0.5757053, 0.25363114, 1)
-destination_label = "Goblin Woodland"
+destination_label = "Corrupted Woodland"
 target_instance = ExtResource("12_sgxfe")
 warper_id = 23
 target_id = 23
@@ -637,25 +637,25 @@ target_id = 23
 [node name="DesertPortal" parent="Warpers" unique_id=151131626 instance=ExtResource("29_2sqao")]
 position = Vector2(992, -48)
 portal_color = Color(0.5308139, 0.42815638, 0, 1)
-destination_label = "Desert"
+destination_label = "Scorching Wastes"
 required_level = 25
 
 [node name="DesertPortal2" parent="Warpers" unique_id=1638213698 instance=ExtResource("29_2sqao")]
 position = Vector2(856, 80)
 portal_color = Color(0, 0.526729, 0.27035004, 1)
-destination_label = "The Sewers"
+destination_label = "The Undercaverns"
 required_level = 15
 
 [node name="FireForgePortal" parent="Warpers" unique_id=121112763 instance=ExtResource("29_2sqao")]
 position = Vector2(992, 16)
 portal_color = Color(0.7412448, 0.25372657, 0, 1)
-destination_label = "Fire Forge"
+destination_label = "Spirit Forge"
 required_level = 30
 
 [node name="CavePortal" parent="Warpers" unique_id=396714839 instance=ExtResource("29_2sqao")]
 position = Vector2(856, -48)
 portal_color = Color(0.37106, 0.22349265, 0.094957806, 1)
-destination_label = "Fungus Cave"
+destination_label = "Spore Cavern"
 target_instance = ExtResource("24_2sqao")
 warper_id = 21
 target_id = 21

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("2_script")
-item_name = &"Sewer Leather"
+item_name = &"Undercavern Leather"
 item_icon = ExtResource("1_fo466")
 description = "Cured scale-leather from the Capital's underbelly. Used to craft leather armor."
 metadata/_custom_type_script = "uid://nsr1timk430j"

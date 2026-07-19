@@ -18,10 +18,10 @@ required_amount = 2
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Break the Camp Guard"
-description = "Kill 3 bandit brutes and 2 bandit sorcerers in the inner camp. Put the sorcerers down first. They patch the big ones up faster than you can cut them down."
+description = "Kill 3 rogue cultivator brutes and 2 rogue cultivator sorcerers in the inner camp. Put the sorcerers down first. They patch the big ones up faster than you can cut them down."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_brutes"), SubResource("Obj_kill_sorcerers")])
 min_level = 12
-unlock_message = "[Watch Sergeant] The inner camp is your problem now. Watch for the sorcerers. Kill them first and the rest goes easy."
+unlock_message = "[Sect Guard Captain] The inner camp is your problem now. Watch for the sorcerers. Kill them first and the rest goes easy."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_q2")])
 reward_xp = 450
 reward_gold = 16

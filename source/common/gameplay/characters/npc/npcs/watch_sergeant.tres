@@ -23,7 +23,7 @@ label_override = "Ask about the camp"
 
 [resource]
 script = ExtResource("1_npcres")
-npc_name = "Watch Sergeant"
+npc_name = "Sect Guard Captain"
 skin = ExtResource("11_skin")
 greeting = "Hold. This is as far as the road is safe. Past those stakes it is all bandit ground. If you are here to fight, the watch pays for outlaw work. If not, turn around."
 interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_sergeant"), SubResource("Dialogue_camp")])

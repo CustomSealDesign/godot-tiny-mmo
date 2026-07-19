@@ -11,14 +11,14 @@ enemy_type = &"goblin_chief"
 
 [resource]
 script = ExtResource("2_xnv0w")
-quest_name = "The Goblin Chief"
-description = "Kill the goblin chief inside the warren. Cut off the head and the raids stop."
+quest_name = "The Sprite Warlord"
+description = "Kill the corrupted sprite chief inside the warren. Cut off the head and the raids stop."
 objectives = Array[ExtResource("1_8vmji")]([SubResource("Obj_kill_chief")])
 min_level = 4
 unlock_message = "[Warden Bren] The chief is holed up deep in the warren. Come see me when you are ready."
 requires_quests = Array[ExtResource("2_xnv0w")]([ExtResource("3_ivwvu")])
 reward_xp = 160
 reward_gold = 12
-grant_title = "Warrenbreaker"
+grant_title = "Sprite Slayer"
 metadata/slug = &"the_goblin_chief"
 metadata/id = 32

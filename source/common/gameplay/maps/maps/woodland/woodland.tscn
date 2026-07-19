@@ -146,7 +146,7 @@ position = Vector2(112, -48)
 [node name="Portal" parent="." unique_id=375786523 instance=ExtResource("11_ctq8n")]
 position = Vector2(117.31848, 77.95807)
 portal_color = Color(1.2513996e-06, 0.5407531, 0.6588039, 1)
-destination_label = "Castle Garden"
+destination_label = "Sect Courtyard"
 target_instance = ExtResource("12_4auct")
 warper_id = 23
 target_id = 23

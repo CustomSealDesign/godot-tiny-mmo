@@ -12,8 +12,8 @@ required_amount = 5
 
 [resource]
 script = ExtResource("2_quest")
-quest_name = "Pop the Puffcaps"
-description = "Pop 5 puffcaps before they seed the walls. Mind the spore bolts, they sting from far off."
+quest_name = "Pop the Puffcap Spirits"
+description = "Pop 5 puffcap spirits before they seed the walls. Mind the spore bolts, they sting from far off."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_puffcap")])
 min_level = 5
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_q1")])

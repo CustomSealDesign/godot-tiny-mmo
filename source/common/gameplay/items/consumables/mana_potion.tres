@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_script")
 mana_amount = 100
-item_name = &"Mana Potion"
+item_name = &"Qi Restoration Pill"
 item_icon = ExtResource("1_8k35l")
 description = "A swirl of blue, gone in one swallow."
 vendor_value = 2

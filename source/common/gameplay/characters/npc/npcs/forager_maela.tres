@@ -23,7 +23,7 @@ label_override = "Ask about the glow"
 
 [resource]
 script = ExtResource("1_npcres")
-npc_name = "Forager Maela"
+npc_name = "Herb-Gatherer Maela"
 skin = ExtResource("11_skin")
 greeting = "Watch your step, the caps burst when you crowd them. You here to clear the galleries? Good. I mark what needs cutting, you cut it."
 interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_maela"), SubResource("Dialogue_glow")])

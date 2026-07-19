@@ -42,7 +42,7 @@ metadata/_custom_type_script = "uid://ddps5vwhnf048"
 
 [sub_resource type="Resource" id="Resource_pvtw6"]
 script = ExtResource("18_kouuu")
-display_name = "Fungus Domain"
+display_name = "Spore Domain"
 recommended_level = 5
 instance_name = &"fungus_dungeon"
 map_path = "uid://bxq6itupvblac"
@@ -259,7 +259,7 @@ scale = Vector2(3.559999, 1)
 [node name="CastleGardenPortal" parent="." unique_id=375786523 instance=ExtResource("19_pvtw6")]
 position = Vector2(-96, -120)
 portal_color = Color(1.2513996e-06, 0.5407531, 0.6588039, 1)
-destination_label = "Castle Garden"
+destination_label = "Sect Courtyard"
 target_instance = ExtResource("8_f6l70")
 warper_id = 21
 target_id = 21

@@ -11,8 +11,8 @@ required_amount = 6
 
 [resource]
 script = ExtResource("2_quest")
-quest_name = "Bandit Toll"
-description = "Kill 6 bandit fighters on the road. They charge travelers a toll. The watch pays better for every one you put down."
+quest_name = "Rogue Toll"
+description = "Kill 6 rogue cultivator fighters on the road. They charge travelers a toll. The watch pays better for every one you put down."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_fighters")])
 min_level = 8
 reward_xp = 260

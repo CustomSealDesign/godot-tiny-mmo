@@ -28,7 +28,7 @@ label_override = "Exit Dungeon"
 
 [resource]
 script = ExtResource("5_3pw6e")
-npc_name = "Lost Soul"
+npc_name = "Wandering Spirit"
 skin = ExtResource("6_t1jho")
 greeting = "OH! Wow a adventurer. How could i help you buddy?"
 interactions = Array[ExtResource("1_iita0")]([SubResource("Resource_8au6g"), SubResource("Resource_sqgvj"), SubResource("Resource_63gk8")])

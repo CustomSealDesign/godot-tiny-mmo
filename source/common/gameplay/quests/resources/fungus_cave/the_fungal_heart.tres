@@ -11,8 +11,8 @@ enemy_type = &"fungal_heart"
 
 [resource]
 script = ExtResource("2_quest")
-quest_name = "The Fungal Heart"
-description = "Kill the Fungal Heart at the bottom of the warrens. Burn it out and the cave can breathe again."
+quest_name = "The Spore Spirit Heart"
+description = "Kill the Spore Spirit Heart at the bottom of the warrens. Burn it out and the cave can breathe again."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_heart")])
 min_level = 9
 unlock_message = "[Forager Maela] The Heart is what feeds all this. When you are ready, go end it."

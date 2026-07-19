@@ -28,6 +28,6 @@ script = ExtResource("3_gear")
 slot = ExtResource("4_slot")
 required_level = 20
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_mr"), SubResource("Mod_mana"), SubResource("Mod_speed")])
-item_name = &"Ancient Shoes"
+item_name = &"Ancient Sect Shoes"
 item_icon = ExtResource("2_icon")
 metadata/_custom_type_script = "uid://dnmtdktay2df6"

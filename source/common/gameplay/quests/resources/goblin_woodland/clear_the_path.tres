@@ -18,7 +18,7 @@ required_amount = 3
 [resource]
 script = ExtResource("2_t1ngg")
 quest_name = "Clear the Path"
-description = "Thin out the goblins along the bramble path. Watch the cutters, they leap when you stand still."
+description = "Thin out the corrupted sprites along the bramble path. Watch the cutters, they leap when you stand still."
 objectives = Array[ExtResource("1_hhh5q")]([SubResource("Obj_kill_runt"), SubResource("Obj_kill_cutter")])
 min_level = 2
 requires_quests = Array[ExtResource("2_t1ngg")]([ExtResource("4_q1")])

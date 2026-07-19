@@ -763,7 +763,7 @@ weapon = null
 [node name="HubPortal" parent="." unique_id=766829579 instance=ExtResource("4_2dprc")]
 position = Vector2(984, 1448)
 portal_color = Color(0.3670073, 0.5757053, 0.25363114, 1)
-destination_label = "Castle Garden"
+destination_label = "Sect Courtyard"
 target_instance = ExtResource("28_hub")
 warper_id = 23
 target_id = 23

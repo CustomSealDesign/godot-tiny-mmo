@@ -23,7 +23,7 @@ label_override = "Ask about the road ahead"
 
 [resource]
 script = ExtResource("1_npcres")
-npc_name = "Warden Bren"
+npc_name = "Outer Sect Warden Bren"
 skin = ExtResource("11_skin")
 greeting = "Hold there. The meadow past this gate is crawling with goblins. If you can swing that thing on your back, I have work for you."
 interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_bren"), SubResource("Dialogue_road_ahead")])

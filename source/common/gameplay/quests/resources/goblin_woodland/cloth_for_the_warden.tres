@@ -15,7 +15,7 @@ required_amount = 6
 [resource]
 script = ExtResource("3_rbqkh")
 quest_name = "Cloth for the Warden"
-description = "Bring me 6 bolts of forest cloth. The goblins steal it faster than the camp can weave it."
+description = "Bring me 6 bolts of forest cloth. The corrupted sprites steal it faster than the camp can weave it."
 objectives = Array[ExtResource("1_d47vj")]([SubResource("Obj_collect_cloth")])
 min_level = 3
 requires_quests = Array[ExtResource("3_rbqkh")]([ExtResource("5_q1")])

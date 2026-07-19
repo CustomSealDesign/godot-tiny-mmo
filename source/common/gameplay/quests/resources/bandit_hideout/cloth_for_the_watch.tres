@@ -15,7 +15,7 @@ required_amount = 6
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Cloth for the Watch"
-description = "Bring me 6 Bandit Cloth. Most of it is stolen wool anyway. We patch our own gear with it and call it fair."
+description = "Bring me 6 Rogue cultivator Cloth. Most of it is stolen wool anyway. We patch our own gear with it and call it fair."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_collect_cloth")])
 min_level = 10
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("4_q1")])

@@ -20,7 +20,7 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [resource]
 script = ExtResource("4_gnyxw")
-npc_name = "Starter Merchant"
+npc_name = "Sect Merchant"
 skin = ExtResource("6_cn5qi")
 greeting = "You're new-lit, so I'll keep it plain: this lot keeps you alive past the gate, that lot doesn't. Coin first, questions never."
 interactions = Array[ExtResource("1_nmd86")]([SubResource("Resource_udfpp"), SubResource("Resource_cn5qi")])
