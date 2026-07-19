@@ -277,8 +277,14 @@ func process_movement(delta: float) -> void:
 			_finish_grid_movement()
 		return
 
+	# Clamp this frame's speed so a fixed step can never OVERSHOOT the waypoint. Without
+	# this, when the remaining distance is between the 0.35 arrival threshold and one full
+	# step (move_speed*delta), the body jumps past the target and back every frame —
+	# oscillating in place forever: the character/camera vibrate ("fuzzy" in motion, sharp
+	# in a still), it never "arrives", and movement feels stuck.
+	var step_speed: float = minf(move_speed, distance / maxf(delta, 0.0001))
 	var direction_world: Vector3 = PlaneCoords3D.plane_to_world(direction_plane.normalized(), 0.0)
-	body.velocity = direction_world * move_speed
+	body.velocity = direction_world * step_speed
 	body.move_and_slide()
 	# Self-heal: if the body position ever goes non-finite, recover to the last good tile
 	# instead of letting NaN propagate into the camera (garbled view) and wire sync.
