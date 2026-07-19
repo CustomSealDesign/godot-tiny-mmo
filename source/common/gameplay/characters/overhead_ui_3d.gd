@@ -26,6 +26,9 @@ static func place(control: Control, camera: Camera3D, world_pos: Vector3, screen
 		control.global_position = OFFSCREEN
 		return
 	var screen: Vector2 = camera.unproject_position(world_pos)
+	if not screen.is_finite():
+		control.global_position = OFFSCREEN
+		return
 	# Center on the projected point, accounting for the control's own scale (the name
 	# label is drawn at 0.2 scale).
 	control.global_position = screen + screen_offset - Vector2(control.size.x * control.scale.x * 0.5, 0.0)

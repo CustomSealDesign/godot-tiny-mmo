@@ -10,6 +10,12 @@ const DIRECTIONS: Array[Vector2i] = [
 	Vector2i(-1, 1), Vector2i(0, 1), Vector2i(1, 1),
 ]
 
+## Hard caps so a bad target can never make the AStar grid allocate unbounded memory
+## (the classic "moved then the client froze" hang). Woodland is ~40 tiles across, so
+## these are far above any real path.
+const MAX_PATH_TILES: int = 256
+const MAX_REGION_SIDE: int = 512
+
 var _astar: AStarGrid2D = AStarGrid2D.new()
 var _space_state: PhysicsDirectSpaceState3D
 var _floor_mask: int = 1
@@ -36,6 +42,12 @@ func find_path(from_plane: Vector2, to_plane: Vector2) -> PackedVector2Array:
 	var end_grid: Vector2i = GridMovement.plane_to_grid(to_plane)
 	if start_grid == end_grid:
 		return PackedVector2Array([GridMovement.grid_to_plane(end_grid)])
+
+	# Safety: never try to path across an absurd distance. A bad/garbage target (or a
+	# click that resolved far off the map) would otherwise make _build_region allocate a
+	# gigantic AStar grid -> memory thrash + hang. Fail the path instead.
+	if absi(end_grid.x - start_grid.x) > MAX_PATH_TILES or absi(end_grid.y - start_grid.y) > MAX_PATH_TILES:
+		return PackedVector2Array()
 
 	_ensure_region(start_grid, end_grid)
 	if not _is_walkable(end_grid):
@@ -104,6 +116,12 @@ func _ensure_region(a: Vector2i, b: Vector2i) -> void:
 
 
 func _build_region(region: Rect2i) -> void:
+	# Belt-and-suspenders: clamp any requested region to a sane size so a runaway caller
+	# can never allocate a giant AStar grid + churn thousands of raycasts (client hang).
+	if region.size.x > MAX_REGION_SIDE or region.size.y > MAX_REGION_SIDE:
+		region.size.x = mini(region.size.x, MAX_REGION_SIDE)
+		region.size.y = mini(region.size.y, MAX_REGION_SIDE)
+
 	_astar.region = region
 	_astar.cell_size = Vector2(GridMovement.TILE_SIZE, GridMovement.TILE_SIZE)
 	_astar.offset = Vector2(GridMovement.HALF_TILE, GridMovement.HALF_TILE)
