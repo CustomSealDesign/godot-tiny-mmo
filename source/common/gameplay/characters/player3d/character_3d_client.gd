@@ -19,9 +19,12 @@ const BAR_COLOR_NEUTRAL: Color = Color(0.82, 0.82, 0.86)
 const BAR_COLOR_HOSTILE: Color = Color(0.86, 0.33, 0.28)
 
 const WALK_ANIM_FPS: float = 5.0
+# Ninja Adventure character sheets are 4 cols x 7 rows of 16px frames; the FRONT-facing
+# (down) walk is the top row (frames 0-3). Billboards face the camera, so we cycle that
+# row and use flip_h for left/right. Frame 0 = standing, 1-3 = walk steps.
 const IDLE_SPRITE_FRAME: int = 0
 const WALK_SPRITE_FRAME_FIRST: int = 1
-const WALK_SPRITE_FRAME_LAST: int = 5
+const WALK_SPRITE_FRAME_LAST: int = 3
 
 static var local_viewer_guild_id: int = 0
 static var spar_ally_peers: Array = []
