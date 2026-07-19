@@ -289,7 +289,10 @@ func _pixel_material(texture: Texture2D) -> StandardMaterial3D:
 	mat.albedo_texture = texture
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	# Opaque: the ground is solid, so skip alpha testing/blending entirely (cheaper, and
+	# avoids transparency-pass driver stalls on weaker GPUs). Cull disabled so the floor is
+	# visible regardless of quad winding.
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return mat
 
