@@ -22,12 +22,12 @@ loot_quantity = 1
 [node name="Visual3D" type="Node3D" parent="."]
 
 [node name="Sprite3D" type="Sprite3D" parent="Visual3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0)
 billboard = 2
 texture = ExtResource("3_sprite")
 hframes = 3
 vframes = 2
-pixel_size = 0.0025
+pixel_size = 0.125
 
 [node name="ClickArea" parent="." instance=ExtResource("2_click")]
 
