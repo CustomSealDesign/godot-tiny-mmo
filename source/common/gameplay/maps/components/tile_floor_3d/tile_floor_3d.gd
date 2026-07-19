@@ -48,13 +48,17 @@ const _BAKED_ROOT_NAME: StringName = &"__Baked3D"
 
 
 func _ready() -> void:
-	# CLIENT ONLY. The headless world server also instantiates this map (maps are shared
-	# scenes) but is 2D and does no walkability check, so it must never bake — building a
-	# 3D floor + physics there is pointless and was crashing world spin-up. Detect the
-	# server by its headless DisplayServer: this is dependency-free (referencing GameMode
-	# from a map-loaded script pulled it into the scene's load graph and segfaulted the
-	# server). NB: this node is deliberately NOT @tool — baking during editor import
-	# instantiation also crashed the headless server.
+	# CLIENT ONLY. Every server role also instantiates this map (maps are shared scenes)
+	# but is 2D and does no walkability check, so it must never bake — pointless, and it
+	# was crashing world spin-up. Detect servers by their role FEATURE TAGS, not just
+	# headless: in the editor's multi-instance run the servers are NOT headless (they open
+	# a window with a feature tag), so a headless-only check let the bake run on them. Use
+	# OS.has_feature / DisplayServer — both built-ins with NO class dependency; referencing
+	# a class_name (e.g. GameMode) here pulled it into the map's native load graph and
+	# segfaulted world spin-up. NB: deliberately NOT @tool — baking during editor import
+	# instantiation also crashed the server.
+	if OS.has_feature("world-server") or OS.has_feature("gateway-server") or OS.has_feature("master-server"):
+		return
 	if DisplayServer.get_name() == "headless":
 		return
 	bake()
