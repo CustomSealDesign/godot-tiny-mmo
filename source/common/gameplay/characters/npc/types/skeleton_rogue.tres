@@ -10,7 +10,7 @@
 [resource]
 script = ExtResource("2_arlp1")
 enemy_type = &"skeleton_rogue"
-display_name = "Skeleton Rogue"
+display_name = "Bone Assassin"
 skin = ExtResource("3_v3str")
 visual_scale = 1.5
 max_health = 150.0

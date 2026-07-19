@@ -9,7 +9,7 @@
 [resource]
 script = ExtResource("2_efxcj")
 enemy_type = &"orc"
-display_name = "Orc"
+display_name = "Lesser Yaksha"
 skin = ExtResource("3_efxcj")
 max_health = 220.0
 attack_damage = 20.0

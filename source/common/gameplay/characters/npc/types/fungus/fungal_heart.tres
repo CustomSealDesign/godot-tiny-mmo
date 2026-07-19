@@ -40,7 +40,7 @@ chance = 0.22
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"fungal_heart"
-display_name = "The Fungal Heart"
+display_name = "The Spore Spirit Heart"
 skin = ExtResource("4_skin")
 visual_scale = 1.5
 is_boss = true

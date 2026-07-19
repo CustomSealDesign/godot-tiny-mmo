@@ -14,7 +14,7 @@ max_amount = 2
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"iron_golem"
-display_name = "Iron Golem"
+display_name = "Iron Puppet"
 max_health = 340.0
 attack_damage = 20.0
 attack_cooldown = 2.0

@@ -23,7 +23,7 @@ chance = 0.4
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit"
-display_name = "Highway Bandit"
+display_name = "Rogue Cultivator"
 skin = ExtResource("5_852w6")
 max_health = 200.0
 attack_damage = 15.0

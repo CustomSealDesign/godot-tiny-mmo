@@ -23,7 +23,7 @@ chance = 0.25
 [resource]
 script = ExtResource("3_kmpfu")
 enemy_type = &"goblin_cutter"
-display_name = "Goblin Cutter"
+display_name = "Blade Sprite"
 skin = ExtResource("4_4il4u")
 max_health = 45.0
 attack_damage = 7.0

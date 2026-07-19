@@ -21,7 +21,7 @@ chance = 0.4
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"puffcap"
-display_name = "Puffcap"
+display_name = "Puffcap Spirit"
 skin = ExtResource("4_skin")
 max_health = 42.0
 attack_damage = 10.0

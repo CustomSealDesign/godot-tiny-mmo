@@ -46,7 +46,7 @@ chance = 0.2
 [resource]
 script = ExtResource("8_tvh5y")
 enemy_type = &"goblin_chief"
-display_name = "Goblin Chief"
+display_name = "Sprite Warlord"
 skin = ExtResource("9_61lu3")
 visual_scale = 1.4
 is_boss = true

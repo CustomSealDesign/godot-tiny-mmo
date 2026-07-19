@@ -16,7 +16,7 @@ max_amount = 4
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"dungeon_boss"
-display_name = "Dungeon Warlord"
+display_name = "Demonic Sect Enforcer"
 skin = ExtResource("3_skin")
 visual_scale = 1.8
 is_boss = true

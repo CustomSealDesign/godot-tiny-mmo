@@ -24,7 +24,7 @@ chance = 0.5
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit_brute"
-display_name = "Bandit Brute"
+display_name = "Rogue Body Cultivator"
 skin = ExtResource("4_skin")
 visual_scale = 1.1
 max_health = 220.0

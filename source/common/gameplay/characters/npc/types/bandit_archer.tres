@@ -17,7 +17,7 @@ chance = 0.4
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit_archer"
-display_name = "Bandit Archer"
+display_name = "Rogue Archer"
 skin = ExtResource("4_skin")
 max_health = 70.0
 attack_damage = 14.0

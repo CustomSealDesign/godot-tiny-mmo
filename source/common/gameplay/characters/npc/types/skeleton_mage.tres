@@ -15,7 +15,7 @@ lunge_range = 150.0
 [resource]
 script = ExtResource("2_q12sl")
 enemy_type = &"skeleton_mage"
-display_name = "Skeleton Mage"
+display_name = "Corpse Sorcerer"
 skin = ExtResource("3_q12sl")
 visual_scale = 2.0
 is_boss = true

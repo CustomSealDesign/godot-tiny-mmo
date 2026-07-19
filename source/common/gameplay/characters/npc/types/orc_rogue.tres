@@ -10,7 +10,7 @@
 [resource]
 script = ExtResource("2_xmfpj")
 enemy_type = &"orc_rogue"
-display_name = "Orc Rogue"
+display_name = "Yaksha Stalker"
 skin = ExtResource("3_knvur")
 max_health = 250.0
 attack_damage = 20.0

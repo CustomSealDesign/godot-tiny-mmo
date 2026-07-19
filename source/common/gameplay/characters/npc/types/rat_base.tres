@@ -9,7 +9,7 @@
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"rat_base"
-display_name = "Rat"
+display_name = "Qi Rat"
 skin = ExtResource("3_wd74x")
 max_health = 150.0
 attack_damage = 16.0

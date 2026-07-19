@@ -9,7 +9,7 @@
 [resource]
 script = ExtResource("2_c1a6p")
 enemy_type = &"skeleton"
-display_name = "Skeleton"
+display_name = "Corpse Puppet"
 skin = ExtResource("3_c1a6p")
 max_health = 100.0
 attack_damage = 10.0

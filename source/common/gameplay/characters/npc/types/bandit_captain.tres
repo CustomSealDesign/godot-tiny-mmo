@@ -39,7 +39,7 @@ chance = 0.2
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit_captain"
-display_name = "Bandit Captain"
+display_name = "Rogue Sect Captain"
 skin = ExtResource("5_a7j0n")
 visual_scale = 1.3
 is_boss = true

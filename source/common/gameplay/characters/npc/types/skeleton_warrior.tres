@@ -10,7 +10,7 @@
 [resource]
 script = ExtResource("2_yspoi")
 enemy_type = &"skeleton_warrior"
-display_name = "Skeleton Warrior"
+display_name = "Corpse General"
 skin = ExtResource("3_ojjfu")
 max_health = 120.0
 attack_damage = 15.0

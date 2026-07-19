@@ -24,7 +24,7 @@ metadata/_custom_type_script = "uid://dyw7fn4hr7rbh"
 [resource]
 script = ExtResource("2_1jsux")
 enemy_type = &"orc_leader"
-display_name = "Orc Leader"
+display_name = "Yaksha Warlord"
 skin = ExtResource("3_3a3qb")
 visual_scale = 1.5
 is_boss = true

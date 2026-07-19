@@ -24,7 +24,7 @@ chance = 0.5
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"myconid_brute"
-display_name = "Myconid Brute"
+display_name = "Spore Brute"
 skin = ExtResource("4_skin")
 max_health = 130.0
 attack_damage = 14.0

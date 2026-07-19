@@ -16,7 +16,7 @@ max_amount = 8
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"world_boss"
-display_name = "The Stone Colossus"
+display_name = "The Ancient Stone Titan"
 skin = ExtResource("3_skin")
 visual_scale = 2.4
 is_boss = true

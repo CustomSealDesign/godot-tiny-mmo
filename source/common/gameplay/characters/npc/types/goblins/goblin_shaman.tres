@@ -17,7 +17,7 @@ chance = 0.5
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"goblin_shaman"
-display_name = "Goblin Shaman"
+display_name = "Hex Sprite"
 skin = ExtResource("4_skin")
 max_health = 40.0
 attack_damage = 10.0

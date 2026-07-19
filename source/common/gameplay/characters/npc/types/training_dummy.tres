@@ -9,7 +9,7 @@
 [resource]
 script = ExtResource("1_enemy")
 enemy_type = &"training_dummy"
-display_name = "Training Dummy"
+display_name = "Training Puppet"
 skin = ExtResource("2_skin")
 max_health = 200.0
 attack_damage = 0.0

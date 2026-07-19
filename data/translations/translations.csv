@@ -24,13 +24,13 @@ COMMUNITY,Community,Comunidade,Comunidad
 PATCH_NOTES,Patch notes,Notas de atualização,Notas de actualización
 LOGOUT,Log out,Sair,Salir
 CLOSE_GAME,Close game,Fechar jogo,Cerrar el juego
-CONNECTING,Connecting to Ekonia…,Conectando ao Ekonia…,Conectando a Ekonia…
-SERVER_ONLINE,Connected · Ekonia,Conectado · Ekonia,Conectado · Ekonia
+CONNECTING,Connecting to Immortal Ascension…,Conectando ao Immortal Ascension…,Conectando a Immortal Ascension…
+SERVER_ONLINE,Connected · Immortal Ascension,Conectado · Immortal Ascension,Conectado · Immortal Ascension
 STATUS_ONLINE,Connected,Conectado,Conectado
 STATUS_OFFLINE,Offline,Offline,Sin conexión
 NOT_LOGGED_IN,Not logged in,Não autenticado,No autenticado
 CANT_REACH_TITLE,Connection,Conexão,Conexión
-ERR_CANT_REACH,Couldn't reach Ekonia. Check your connection and retry.,Não foi possível conectar ao Ekonia. Verifique sua conexão e tente novamente.,No se pudo conectar a Ekonia. Verifica tu conexión e inténtalo de nuevo.
+ERR_CANT_REACH,Couldn't reach Immortal Ascension. Check your connection and retry.,Não foi possível conectar ao Immortal Ascension. Verifique sua conexão e tente novamente.,No se pudo conectar a Immortal Ascension. Verifica tu conexión e inténtalo de nuevo.
 RETRY,Retry,Tentar novamente,Reintentar
 UPDATE_TITLE,Update required,Atualização necessária,Actualización requerida
 UPDATE,Update,Atualizar,Actualizar

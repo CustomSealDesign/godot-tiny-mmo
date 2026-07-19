@@ -15,7 +15,7 @@ max_amount = 5
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"iron_warlord"
-display_name = "The Iron Warlord"
+display_name = "The Iron Corpse General"
 max_health = 800.0
 attack_damage = 35.0
 attack_cooldown = 2.5

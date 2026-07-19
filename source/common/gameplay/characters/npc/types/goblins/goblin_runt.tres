@@ -15,7 +15,7 @@ chance = 0.15
 [resource]
 script = ExtResource("3_6vglo")
 enemy_type = &"goblin_runt"
-display_name = "Goblin Runt"
+display_name = "Corrupted Sprite"
 skin = ExtResource("4_omqau")
 visual_scale = 0.85
 max_health = 28.0
