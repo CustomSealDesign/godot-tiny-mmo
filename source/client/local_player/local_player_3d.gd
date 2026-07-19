@@ -150,9 +150,7 @@ func move_to_plane(destination_plane: Vector2, interact_target: Node = null) -> 
 	_stop_grid_movement()
 
 	var snapped_destination: Vector2 = GridMovement.snap_plane(destination_plane)
-	_ft("X_findpath_start")
 	_current_path = pathfinder.find_path(global_position, snapped_destination)
-	_ft("X_findpath_done")
 	if _current_path.is_empty():
 		movement_finished.emit()
 		return
