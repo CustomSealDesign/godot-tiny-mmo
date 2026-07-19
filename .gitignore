@@ -35,3 +35,6 @@ addons/godot-sqlite/bin/*
 /data/config/discord_webhook.cfg
 source/server/master/account_collection.tres
 /addons/godot_mcp_to_delete/
+
+# Paid asset packs — public repo, no redistribution allowed
+/art_private/
