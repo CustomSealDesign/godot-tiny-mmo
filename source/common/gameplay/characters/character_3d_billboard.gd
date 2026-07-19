@@ -48,21 +48,21 @@ func _process(_delta: float) -> void:
 	if _sprite == null or _src == null or not is_instance_valid(_character):
 		return
 
-	# Mirror the current animation frame onto the billboard.
+	# Mirror the current animation frame onto the billboard, scaled to a consistent world
+	# height regardless of the source sprite's pixel resolution (fixes tiny/huge mismatches).
 	var frames: SpriteFrames = _src.sprite_frames
 	if frames != null and frames.has_animation(_src.animation):
 		var tex: Texture2D = frames.get_frame_texture(_src.animation, _src.frame)
 		if tex != null:
 			_sprite.texture = tex
+			_sprite.pixel_size = PixelScale3D.CHARACTER_WORLD_HEIGHT / float(maxi(1, tex.get_height()))
 	_sprite.flip_h = _src.flip_h
 
 	# Stand the billboard on the floor at the character's plane position.
 	var plane: Vector2 = _character.global_position
 	var floor_y: float = _sample_floor_y(plane)
 	var world: Vector3 = PlaneCoords3D.plane_to_world(plane, floor_y)
-	var height_world: float = 32.0
-	if _sprite.texture != null:
-		height_world = float(_sprite.texture.get_height()) * _sprite.pixel_size
+	var height_world: float = PixelScale3D.CHARACTER_WORLD_HEIGHT
 	_sprite.global_position = world + Vector3.UP * (height_world * 0.5)
 
 	# Keep the 2D health bar + name label pinned over the billboard.

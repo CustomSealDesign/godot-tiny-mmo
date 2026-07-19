@@ -42,10 +42,20 @@ static func ground_offset_for(sprite: Sprite3D) -> float:
 	return frame_height_px * sprite.pixel_size * 0.5
 
 
-## Apply the canonical billboard scale + ground offset to a Sprite3D in one call.
-## Client-only callers use this from _ready so every entity is placed identically.
-static func apply_billboard(sprite: Sprite3D) -> void:
-	if sprite == null:
+## Target on-screen height (world units) for a character-sized billboard. ~1.5 gameplay
+## tiles. Because pixel_size is derived from this and the sprite's real frame height, a
+## 16px pack sprite and a 512px placeholder render at the SAME height — this is what makes
+## mismatched/placeholder art stop looking tiny, and keeps re-skinned art consistent.
+const CHARACTER_WORLD_HEIGHT: float = 44.0
+
+
+## Apply a consistent billboard scale (sized to [param target_height] world units) + the
+## matching ground offset in one call. pixel_size is computed from the sprite's frame height
+## so ANY source resolution renders at the same world height. Client-only callers use this.
+static func apply_billboard(sprite: Sprite3D, target_height: float = CHARACTER_WORLD_HEIGHT) -> void:
+	if sprite == null or sprite.texture == null:
 		return
-	sprite.pixel_size = SPRITE_PIXEL_SIZE
+	var frame_height_px: float = float(sprite.texture.get_height()) / float(maxi(1, sprite.vframes))
+	if frame_height_px > 0.0:
+		sprite.pixel_size = target_height / frame_height_px
 	sprite.position.y = ground_offset_for(sprite)

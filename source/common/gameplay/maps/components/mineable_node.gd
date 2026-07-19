@@ -392,6 +392,13 @@ func _ensure_billboard_3d() -> void:
 	else:
 		_billboard_3d.region_enabled = false
 		_billboard_3d.texture = tex
+	# Size to a consistent small world height (~0.7 tile) regardless of source resolution.
+	var h_px: float = 16.0
+	if _billboard_3d.region_enabled:
+		h_px = _billboard_3d.region_rect.size.y
+	elif _billboard_3d.texture != null:
+		h_px = float(_billboard_3d.texture.get_height())
+	_billboard_3d.pixel_size = 22.0 / maxf(1.0, h_px)
 
 
 func _place_billboard_3d() -> void:
