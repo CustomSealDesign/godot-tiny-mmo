@@ -383,7 +383,15 @@ func _ensure_billboard_3d() -> void:
 		_billboard_3d.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 		add_child(_billboard_3d)
 		_place_billboard_3d.call_deferred()
-	_billboard_3d.texture = data.texture
+	# Sprite3D doesn't apply an AtlasTexture's region — feed it the base texture + region.
+	var tex: Texture2D = data.texture
+	if tex is AtlasTexture:
+		_billboard_3d.texture = (tex as AtlasTexture).atlas
+		_billboard_3d.region_enabled = true
+		_billboard_3d.region_rect = (tex as AtlasTexture).region
+	else:
+		_billboard_3d.region_enabled = false
+		_billboard_3d.texture = tex
 
 
 func _place_billboard_3d() -> void:
@@ -395,10 +403,14 @@ func _place_billboard_3d() -> void:
 		return
 	var floor_y: float = _sample_floor_y_3d(global_position)
 	var world: Vector3 = PlaneCoords3D.plane_to_world(global_position, floor_y)
-	var tex: Texture2D = _billboard_3d.texture
-	var height_world: float = (float(tex.get_height()) if tex != null else 32.0) * _billboard_3d.pixel_size
+	# Use the region height when a sub-region of an atlas is shown, not the whole atlas.
+	var height_px: float = 32.0
+	if _billboard_3d.region_enabled:
+		height_px = _billboard_3d.region_rect.size.y
+	elif _billboard_3d.texture != null:
+		height_px = float(_billboard_3d.texture.get_height())
 	# Stand it on the floor (bottom edge on the ground).
-	_billboard_3d.global_position = world + Vector3.UP * (height_world * 0.5)
+	_billboard_3d.global_position = world + Vector3.UP * (height_px * _billboard_3d.pixel_size * 0.5)
 
 
 func _sample_floor_y_3d(plane: Vector2) -> float:
