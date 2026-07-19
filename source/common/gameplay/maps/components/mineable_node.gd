@@ -362,3 +362,54 @@ func _apply_sprite() -> void:
 	# Works whether `data.texture` is a plain Texture2D or an AtlasTexture —
 	# AtlasTexture is itself a Texture2D and carries its own region.
 	_sprite.texture = data.texture
+	# On the client, render this world node as a 3D billboard so it sits in the 3D
+	# world instead of the 2D canvas (which, under a Camera3D, sticks to the screen).
+	if not multiplayer.is_server():
+		_ensure_billboard_3d()
+
+
+var _billboard_3d: Sprite3D
+
+
+func _ensure_billboard_3d() -> void:
+	_sprite.visible = false
+	if _billboard_3d == null:
+		_billboard_3d = Sprite3D.new()
+		_billboard_3d.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+		_billboard_3d.pixel_size = PixelScale3D.SPRITE_PIXEL_SIZE
+		_billboard_3d.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+		_billboard_3d.shaded = false
+		_billboard_3d.transparent = true
+		_billboard_3d.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+		add_child(_billboard_3d)
+		_place_billboard_3d.call_deferred()
+	_billboard_3d.texture = data.texture
+
+
+func _place_billboard_3d() -> void:
+	if _billboard_3d == null:
+		return
+	# Wait a physics frame so the map's TileFloor3D collider exists to sample.
+	await get_tree().physics_frame
+	if not is_instance_valid(_billboard_3d):
+		return
+	var floor_y: float = _sample_floor_y_3d(global_position)
+	var world: Vector3 = PlaneCoords3D.plane_to_world(global_position, floor_y)
+	var tex: Texture2D = _billboard_3d.texture
+	var height_world: float = (float(tex.get_height()) if tex != null else 32.0) * _billboard_3d.pixel_size
+	# Stand it on the floor (bottom edge on the ground).
+	_billboard_3d.global_position = world + Vector3.UP * (height_world * 0.5)
+
+
+func _sample_floor_y_3d(plane: Vector2) -> float:
+	var world: Vector3 = PlaneCoords3D.plane_to_world(plane, 0.0)
+	var viewport: Viewport = get_viewport()
+	if viewport == null or viewport.world_3d == null:
+		return 0.0
+	var query := PhysicsRayQueryParameters3D.create(world + Vector3.UP * 32.0, world - Vector3.UP * 64.0, 1)
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	var hit: Dictionary = viewport.world_3d.direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return 0.0
+	return (hit.get("position", world) as Vector3).y
